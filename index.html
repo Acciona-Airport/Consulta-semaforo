@@ -21,7 +21,7 @@
       padding: 25px;
       border-radius: 18px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 800px;
+      max-width: 1000px;
       width: 100%;
       border: 1px solid #ccc;
     }
@@ -201,7 +201,7 @@
     }
     
     .tabla-container {
-      max-height: 400px;
+      max-height: 500px;
       overflow-y: auto;
       margin-top: 15px;
       border: 1px solid #ddd;
@@ -223,6 +223,11 @@
       font-weight: bold;
     }
     
+    .mantencion {
+      color: #0c5460;
+      font-weight: bold;
+    }
+    
     .filtros {
       display: flex;
       gap: 15px;
@@ -236,6 +241,10 @@
     @media (max-width: 768px) {
       .filtros {
         flex-direction: column;
+      }
+      .container {
+        max-width: 100%;
+        padding: 15px;
       }
     }
   </style>
@@ -257,8 +266,8 @@
       </div>
       
       <div class="filtro-grupo">
-        <label for="familia-equipo">Buscar por familia:</label>
-        <select class="input-estilo" id="familia-equipo">
+        <label for="select-familia">Buscar por familia:</label>
+        <select class="input-estilo" id="select-familia">
           <option value="">Seleccione una familia</option>
           <option value="ASU">ASU</option>
           <option value="ACU">ACU</option>
@@ -292,16 +301,26 @@
     <div id="resultado-individual" class="section" style="display: none;">
       <h2>Información del Equipo</h2>
       <div class="section">
-        <label>Familia del equipo:</label>
+        <label>Número de equipo:</label>
+        <div class="input-estilo" id="equipo-id"></div>
+      </div>
+      <div class="section">
+        <label>Familia:</label>
         <div class="input-estilo" id="familia-info"></div>
       </div>
-
+      <div class="section">
+        <label>Marca:</label>
+        <div class="input-estilo" id="marca-info"></div>
+      </div>
+      <div class="section">
+        <label>Modelo:</label>
+        <div class="input-estilo" id="modelo-info"></div>
+      </div>
       <div class="section">
         <label>Estado actual:</label>
         <div class="input-estilo" id="status-equipo"></div>
         <div id="status-detalle" class="status-box"></div>
       </div>
-
       <div class="section">
         <label>Observaciones:</label>
         <div class="input-estilo" id="observaciones-equipo"></div>
@@ -316,8 +335,8 @@
             <tr>
               <th>Número</th>
               <th>Familia</th>
+              <th>Modelo</th>
               <th>Estado</th>
-              <th>Observaciones</th>
             </tr>
           </thead>
           <tbody id="cuerpo-tabla">
@@ -360,7 +379,10 @@
     }
 
     function limpiarResultados() {
+      document.getElementById("equipo-id").innerText = "";
       document.getElementById("familia-info").innerText = "";
+      document.getElementById("marca-info").innerText = "";
+      document.getElementById("modelo-info").innerText = "";
       document.getElementById("status-equipo").innerText = "";
       document.getElementById("status-detalle").innerText = "";
       document.getElementById("status-detalle").className = "status-box";
@@ -376,6 +398,7 @@
         const response = await fetch(URL_GET + "?tipo=todos");
         const data = await response.json();
         todosEquipos = data;
+        console.log("Equipos cargados:", todosEquipos);
       } catch (error) {
         console.error("Error al cargar equipos:", error);
         alert("Error al cargar la lista de equipos");
@@ -404,11 +427,14 @@
           alert("Equipo no encontrado");
         } else {
           // Mostrar información del equipo
+          document.getElementById("equipo-id").innerText = data.ID || "Sin información";
           document.getElementById("familia-info").innerText = data.FAMILIA || "Sin información";
+          document.getElementById("marca-info").innerText = data["MARCA EQUIPO"] || "Sin información";
+          document.getElementById("modelo-info").innerText = data["MODELO EQUIPO"] || "Sin información";
           
-          // Obtener estado (asumiendo que está en la columna E)
+          // Obtener estado (columna STATUS ✎)
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          document.getElementById("status-equipo").innerText = "Estado: " + estado;
+          document.getElementById("status-equipo").innerText = estado;
           
           // Mostrar detalles según el estado
           let estadoClass = "status-otros";
@@ -444,7 +470,7 @@
 
     // Consultar equipos por familia
     async function consultarFamilia() {
-      const familia = document.getElementById("familia-equipo").value;
+      const familia = document.getElementById("select-familia").value;
       
       if (!familia) {
         alert("Por favor seleccione una familia");
@@ -455,19 +481,14 @@
       mostrarOverlay(true);
 
       try {
-        // Si ya tenemos los equipos cargados, los filtramos localmente
-        if (todosEquipos.length > 0) {
-          filtrarYMostrarEquipos(familia);
+        // Hacer la consulta al servidor para obtener equipos de esta familia
+        const response = await fetch(URL_GET + "?tipo=familia&familia=" + encodeURIComponent(familia));
+        const data = await response.json();
+        
+        if (data.error) {
+          alert(data.error);
         } else {
-          // Si no, hacemos una consulta al servidor
-          const response = await fetch(URL_GET + "?tipo=familia&familia=" + encodeURIComponent(familia));
-          const data = await response.json();
-          
-          if (data.error) {
-            alert("Error al obtener equipos de esta familia");
-          } else {
-            mostrarEquiposFamilia(data, familia);
-          }
+          mostrarEquiposFamilia(data, familia);
         }
       } catch (error) {
         console.error("Error al consultar familia:", error);
@@ -475,14 +496,6 @@
       } finally {
         mostrarOverlay(false);
       }
-    }
-
-    // Filtrar equipos ya cargados
-    function filtrarYMostrarEquipos(familia) {
-      const equiposFiltrados = todosEquipos.filter(equipo => 
-        equipo.FAMILIA && equipo.FAMILIA.toUpperCase() === familia.toUpperCase()
-      );
-      mostrarEquiposFamilia(equiposFiltrados, familia);
     }
 
     // Mostrar los equipos de una familia en la tabla
@@ -505,14 +518,16 @@
             claseEstado = "inoperativo";
           } else if (estado.includes("PREVENTIVO") || estado.includes("MANTENCIÓN")) {
             claseEstado = "preventivo";
+          } else if (estado.includes("MANTENIMIENTO")) {
+            claseEstado = "mantencion";
           }
           
           const fila = document.createElement("tr");
           fila.innerHTML = `
             <td>${equipo.ID || ""}</td>
             <td>${equipo.FAMILIA || ""}</td>
+            <td>${equipo["MODELO EQUIPO"] || ""}</td>
             <td class="${claseEstado}">${estado}</td>
-            <td>${equipo.OBSERVACIONES || ""}</td>
           `;
           cuerpoTabla.appendChild(fila);
         });
