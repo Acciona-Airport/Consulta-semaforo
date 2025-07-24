@@ -1,550 +1,247 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Consulta de Estado de Equipos - Acciona</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Equipos por Familia</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f4;
-      color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 15px;
       margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
     }
     .container {
-      background-color: #ffffff;
-      padding: 25px;
-      border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
       max-width: 1000px;
-      width: 100%;
-      border: 1px solid #ccc;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    .logo-wrapper {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
     }
     .logo {
-      max-width: 120px;
-      padding: 6px;
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 6px;
-      transition: transform 0.3s ease;
-    }
-    .logo:hover { transform: scale(1.03); }
-    h1 {
-      font-size: 16px;
-      color: #111;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    label {
       display: block;
-      margin-top: 14px;
-      margin-bottom: 6px;
-      font-weight: bold;
-      color: #333;
-      font-size: 14px;
+      margin: 0 auto 20px;
+      max-width: 150px;
     }
-    .section { margin-bottom: 20px; }
-    .input-estilo {
-      width: 100%;
-      min-height: 42px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      background-color: #fafafa;
-      color: #000;
-      transition: border-color 0.3s, box-shadow 0.3s;
-      resize: none;
-    }
-    .input-estilo:focus {
-      border-color: #c62828;
-      box-shadow: 0 0 5px rgba(198, 40, 40, 0.4);
-      outline: none;
-    }
-    .datetime-box {
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-      border-radius: 8px;
-      margin-bottom: 18px;
-      font-weight: bold;
-      font-size: 14px;
-      color: #222;
-    }
-    .status-box {
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-    }
-    .status-operativo {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .status-inoperativo {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .status-preventivo {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
-    .status-otros {
-      background-color: #e2e3e5;
-      color: #383d41;
-      border: 1px solid #d6d8db;
-    }
-    .spinner {
-      display: inline-block;
-      width: 15px;
-      height: 15px;
-      border: 2px solid rgba(198, 40, 40, 0.3);
-      border-top-color: #c62828;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      display: none;
-      z-index: 9999;
-      justify-content: center;
+    .selector-container {
+      margin-bottom: 30px;
+      display: flex;
+      gap: 10px;
       align-items: center;
-      flex-direction: column;
     }
-    #overlay .loader {
-      width: 60px;
-      height: 60px;
-      border: 6px solid rgba(198, 40, 40, 0.2);
-      border-top: 6px solid #c62828;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    .btn {
-      background-color: #c62828;
-      color: #fff;
-      border: none;
+    select {
       padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s ease;
-      margin-top: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      flex-grow: 1;
     }
-    .btn:hover {
+    button {
+      padding: 10px 20px;
+      background-color: #c62828;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
       background-color: #b71c1c;
     }
-    
-    .btn-secundario {
-      background-color: #4a6baf;
-      margin-left: 10px;
+    .tabla-container {
+      overflow-x: auto;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
-    .btn-secundario:hover {
-      background-color: #3a5a9f;
-    }
-    
-    select.input-estilo {
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      background-size: 15px;
-    }
-    
-    .tabla-equipos {
+    table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 14px;
     }
-    
-    .tabla-equipos th, .tabla-equipos td {
-      border: 1px solid #ddd;
-      padding: 8px;
+    th, td {
+      padding: 12px 15px;
       text-align: left;
+      border-bottom: 1px solid #ddd;
     }
-    
-    .tabla-equipos th {
+    th {
       background-color: #f2f2f2;
       position: sticky;
       top: 0;
     }
-    
-    .tabla-equipos tr:nth-child(even) {
+    tr:hover {
       background-color: #f9f9f9;
     }
-    
-    .tabla-equipos tr:hover {
-      background-color: #f1f1f1;
-    }
-    
-    .tabla-container {
-      max-height: 500px;
-      overflow-y: auto;
-      margin-top: 15px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
-    
     .operativo {
-      color: #155724;
+      color: #2e7d32;
       font-weight: bold;
     }
-    
     .inoperativo {
-      color: #721c24;
+      color: #c62828;
       font-weight: bold;
     }
-    
     .preventivo {
-      color: #856404;
+      color: #ff8f00;
       font-weight: bold;
     }
-    
     .mantencion {
-      color: #0c5460;
+      color: #0277bd;
       font-weight: bold;
     }
-    
-    .filtros {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
+    .contador {
+      margin: 15px 0;
+      font-weight: bold;
+      color: #333;
     }
-    
-    .filtro-grupo {
-      flex: 1;
-    }
-    
-    @media (max-width: 768px) {
-      .filtros {
-        flex-direction: column;
-      }
-      .container {
-        max-width: 100%;
-        padding: 15px;
-      }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo-wrapper">
-      <img class="logo" src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/LogoAcciona2.png" alt="Logo Acciona" />
+    <img src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/LogoAcciona2.png" alt="Logo Acciona" class="logo">
+    <h1>Consulta de Equipos por Familia</h1>
+    
+    <div class="selector-container">
+      <select id="select-familia">
+        <option value="">-- Seleccione una familia --</option>
+        <!-- Las opciones se llenarán con JavaScript -->
+      </select>
+      <button id="btn-buscar">Buscar</button>
     </div>
-
-    <h1>Consulta de Estado de Equipos</h1>
-    <div class="datetime-box" id="datetime"></div>
-
-    <div class="filtros">
-      <div class="filtro-grupo">
-        <label for="numero-equipo">Buscar por número de equipo:</label>
-        <input type="text" class="input-estilo" id="numero-equipo" placeholder="Ej: 51115" />
-        <button class="btn" onclick="consultarEquipo()">Consultar Equipo</button>
-      </div>
-      
-      <div class="filtro-grupo">
-        <label for="select-familia">Buscar por familia:</label>
-        <select class="input-estilo" id="select-familia">
-          <option value="">Seleccione una familia</option>
-          <option value="ASU">ASU</option>
-          <option value="ACU">ACU</option>
-          <option value="Camión de baño">Camión de baño</option>
-          <option value="Camión de agua">Camión de agua</option>
-          <option value="Carro de baño">Carro de baño</option>
-          <option value="Carro de agua">Carro de agua</option>
-          <option value="Cargo Loader Lower deck">Cargo Loader Lower deck</option>
-          <option value="Cargo Loader Main Deck">Cargo Loader Main Deck</option>
-          <option value="GPU 90 KVA">GPU 90 KVA</option>
-          <option value="GPU 180 KVA">GPU 180 KVA</option>
-          <option value="TRACTOR AVIÓN">TRACTOR AVIÓN</option>
-          <option value="TOWBARLESS">TOWBARLESS</option>
-          <option value="Barra de Tiro">Barra de Tiro</option>
-          <option value="EQUIPOS DE APOYO">EQUIPOS DE APOYO</option>
-          <option value="FURGON">FURGON</option>
-          <option value="Conveyor">Conveyor</option>
-          <option value="Escala Motorizada">Escala Motorizada</option>
-          <option value="Tractor Equipaje Elec">Tractor Equipaje Elec</option>
-          <option value="Tractor Equipaje Diesel">Tractor Equipaje Diesel</option>
-          <option value="Escala Tractable">Escala Tractable</option>
-          <option value="Carro de deshielo">Carro de deshielo</option>
-          <option value="Carro avih">Carro avih</option>
-          <option value="Carro techado">Carro techado</option>
-          <option value="Carro para Remoto">Carro para Remoto</option>
-        </select>
-        <button class="btn btn-secundario" onclick="consultarFamilia()">Mostrar Equipos</button>
-      </div>
+    
+    <div id="contador" class="contador"></div>
+    
+    <div class="tabla-container">
+      <table id="tabla-equipos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Modelo</th>
+            <th>Estado</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body">
+          <!-- Los datos se llenarán aquí -->
+        </tbody>
+      </table>
+      <div id="loading" class="loading">Seleccione una familia para ver los equipos</div>
     </div>
-
-    <div id="resultado-individual" class="section" style="display: none;">
-      <h2>Información del Equipo</h2>
-      <div class="section">
-        <label>Número de equipo:</label>
-        <div class="input-estilo" id="equipo-id"></div>
-      </div>
-      <div class="section">
-        <label>Familia:</label>
-        <div class="input-estilo" id="familia-info"></div>
-      </div>
-      <div class="section">
-        <label>Marca:</label>
-        <div class="input-estilo" id="marca-info"></div>
-      </div>
-      <div class="section">
-        <label>Modelo:</label>
-        <div class="input-estilo" id="modelo-info"></div>
-      </div>
-      <div class="section">
-        <label>Estado actual:</label>
-        <div class="input-estilo" id="status-equipo"></div>
-        <div id="status-detalle" class="status-box"></div>
-      </div>
-      <div class="section">
-        <label>Observaciones:</label>
-        <div class="input-estilo" id="observaciones-equipo"></div>
-      </div>
-    </div>
-
-    <div id="resultado-familia" class="section" style="display: none;">
-      <h2>Equipos de la familia: <span id="nombre-familia"></span></h2>
-      <div class="tabla-container">
-        <table class="tabla-equipos" id="tabla-equipos">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Familia</th>
-              <th>Modelo</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="cuerpo-tabla">
-            <!-- Aquí se llenarán los datos -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div id="overlay">
-    <div class="loader"></div>
   </div>
 
   <script>
-    const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    let todosEquipos = [];
-
-    function actualizarFechaHora() {
-      const now = new Date();
-      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      const diaSemana = dias[now.getDay()];
-      const dia = now.getDate();
-      const mes = meses[now.getMonth()];
-      const anio = now.getFullYear();
-      let hora = now.getHours();
-      const minutos = String(now.getMinutes()).padStart(2, '0');
-      const segundos = String(now.getSeconds()).padStart(2, '0');
-      const ampm = hora >= 12 ? 'P.M' : 'A.M';
-      hora = hora % 12 || 12;
-      const fechaFormateada = `${diaSemana}, ${dia} de ${mes} de ${anio}, ${hora}:${minutos}:${segundos} ${ampm}`;
-      document.getElementById("datetime").innerText = fechaFormateada;
-    }
-    setInterval(actualizarFechaHora, 1000);
-    actualizarFechaHora();
-
-    function mostrarOverlay(mostrar) {
-      document.getElementById("overlay").style.display = mostrar ? "flex" : "none";
-    }
-
-    function limpiarResultados() {
-      document.getElementById("equipo-id").innerText = "";
-      document.getElementById("familia-info").innerText = "";
-      document.getElementById("marca-info").innerText = "";
-      document.getElementById("modelo-info").innerText = "";
-      document.getElementById("status-equipo").innerText = "";
-      document.getElementById("status-detalle").innerText = "";
-      document.getElementById("status-detalle").className = "status-box";
-      document.getElementById("observaciones-equipo").innerText = "";
-      document.getElementById("resultado-individual").style.display = "none";
-      document.getElementById("resultado-familia").style.display = "none";
-    }
-
-    // Cargar todos los equipos al iniciar la página
-    async function cargarTodosEquipos() {
-      mostrarOverlay(true);
-      try {
-        const response = await fetch(URL_GET + "?tipo=todos");
-        const data = await response.json();
-        todosEquipos = data;
-        console.log("Equipos cargados:", todosEquipos);
-      } catch (error) {
-        console.error("Error al cargar equipos:", error);
-        alert("Error al cargar la lista de equipos");
-      } finally {
-        mostrarOverlay(false);
-      }
-    }
-
-    // Consultar un equipo individual
-    async function consultarEquipo() {
-      const id = document.getElementById("numero-equipo").value.trim();
-      
-      if (!id) {
-        alert("Por favor ingrese un número de equipo");
-        return;
-      }
-
-      limpiarResultados();
-      mostrarOverlay(true);
-
-      try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
-        const data = await response.json();
-
-        if (data.error) {
-          alert("Equipo no encontrado");
-        } else {
-          // Mostrar información del equipo
-          document.getElementById("equipo-id").innerText = data.ID || "Sin información";
-          document.getElementById("familia-info").innerText = data.FAMILIA || "Sin información";
-          document.getElementById("marca-info").innerText = data["MARCA EQUIPO"] || "Sin información";
-          document.getElementById("modelo-info").innerText = data["MODELO EQUIPO"] || "Sin información";
-          
-          // Obtener estado (columna STATUS ✎)
-          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          document.getElementById("status-equipo").innerText = estado;
-          
-          // Mostrar detalles según el estado
-          let estadoClass = "status-otros";
-          let icono = "";
-          
-          if (estado.includes("OPERATIVO")) {
-            estadoClass = "status-operativo";
-            icono = "✅ ";
-          } else if (estado.includes("INOPERATIVO")) {
-            estadoClass = "status-inoperativo";
-            icono = "❌ ";
-          } else if (estado.includes("PREVENTIVO") || estado.includes("MANTENCIÓN")) {
-            estadoClass = "status-preventivo";
-            icono = "🛠️ ";
-          }
-          
-          document.getElementById("status-detalle").innerHTML = icono + estado;
-          document.getElementById("status-detalle").className = "status-box " + estadoClass;
-          
-          // Mostrar observaciones
-          document.getElementById("observaciones-equipo").innerText = data.OBSERVACIONES || "Sin observaciones";
-          
-          // Mostrar sección de resultados individuales
-          document.getElementById("resultado-individual").style.display = "block";
-        }
-      } catch (error) {
-        console.error("Error al consultar:", error);
-        alert("Ocurrió un error al consultar el equipo");
-      } finally {
-        mostrarOverlay(false);
-      }
-    }
-
-    // Consultar equipos por familia
-    async function consultarFamilia() {
-      const familia = document.getElementById("select-familia").value;
+    // URL del Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    
+    // Elementos del DOM
+    const selectFamilia = document.getElementById('select-familia');
+    const btnBuscar = document.getElementById('btn-buscar');
+    const tablaBody = document.getElementById('tabla-body');
+    const contador = document.getElementById('contador');
+    const loading = document.getElementById('loading');
+    
+    // Lista de familias disponibles (se puede obtener dinámicamente si es necesario)
+    const familias = [
+      "ASU", "ACU", "Camión de baño", "Camión de agua", "Carro de baño", "Carro de agua",
+      "Cargo Loader Lower deck", "Cargo Loader Main Deck", "GPU 90 KVA", "GPU 180 KVA",
+      "TRACTOR AVIÓN", "TOWBARLESS", "Barra de Tiro", "EQUIPOS DE APOYO", "FURGON",
+      "Conveyor", "Escala Motorizada", "Tractor Equipaje Elec", "Tractor Equipaje Diesel",
+      "Escala Tractable", "Carro de deshielo", "Carro avih", "Carro techado", "Carro para Remoto"
+    ];
+    
+    // Llenar el select con las familias
+    familias.forEach(familia => {
+      const option = document.createElement('option');
+      option.value = familia;
+      option.textContent = familia;
+      selectFamilia.appendChild(option);
+    });
+    
+    // Función para buscar equipos por familia
+    async function buscarEquipos() {
+      const familia = selectFamilia.value;
       
       if (!familia) {
-        alert("Por favor seleccione una familia");
+        alert('Por favor seleccione una familia');
         return;
       }
-
-      limpiarResultados();
-      mostrarOverlay(true);
-
+      
+      loading.textContent = 'Cargando equipos...';
+      tablaBody.innerHTML = '';
+      
       try {
-        // Hacer la consulta al servidor para obtener equipos de esta familia
-        const response = await fetch(URL_GET + "?tipo=familia&familia=" + encodeURIComponent(familia));
+        // Hacer la petición al Google Apps Script
+        const response = await fetch(`${SCRIPT_URL}?tipo=familia&familia=${encodeURIComponent(familia)}`);
         const data = await response.json();
         
         if (data.error) {
-          alert(data.error);
-        } else {
-          mostrarEquiposFamilia(data, familia);
+          loading.textContent = data.error;
+          contador.textContent = '';
+          return;
         }
+        
+        mostrarResultados(data, familia);
       } catch (error) {
-        console.error("Error al consultar familia:", error);
-        alert("Ocurrió un error al consultar la familia");
-      } finally {
-        mostrarOverlay(false);
+        console.error('Error al buscar equipos:', error);
+        loading.textContent = 'Error al cargar los equipos';
+        contador.textContent = '';
       }
     }
-
-    // Mostrar los equipos de una familia en la tabla
-    function mostrarEquiposFamilia(equipos, familia) {
-      document.getElementById("nombre-familia").textContent = familia;
-      
-      const cuerpoTabla = document.getElementById("cuerpo-tabla");
-      cuerpoTabla.innerHTML = "";
-      
+    
+    // Función para mostrar los resultados en la tabla
+    function mostrarResultados(equipos, familia) {
       if (equipos.length === 0) {
-        cuerpoTabla.innerHTML = "<tr><td colspan='4'>No se encontraron equipos para esta familia</td></tr>";
-      } else {
-        equipos.forEach(equipo => {
-          const estado = (equipo["STATUS ✎"] || "Desconocido").toUpperCase();
-          let claseEstado = "";
-          
-          if (estado.includes("OPERATIVO")) {
-            claseEstado = "operativo";
-          } else if (estado.includes("INOPERATIVO")) {
-            claseEstado = "inoperativo";
-          } else if (estado.includes("PREVENTIVO") || estado.includes("MANTENCIÓN")) {
-            claseEstado = "preventivo";
-          } else if (estado.includes("MANTENIMIENTO")) {
-            claseEstado = "mantencion";
-          }
-          
-          const fila = document.createElement("tr");
-          fila.innerHTML = `
-            <td>${equipo.ID || ""}</td>
-            <td>${equipo.FAMILIA || ""}</td>
-            <td>${equipo["MODELO EQUIPO"] || ""}</td>
-            <td class="${claseEstado}">${estado}</td>
-          `;
-          cuerpoTabla.appendChild(fila);
-        });
+        loading.textContent = `No se encontraron equipos para la familia ${familia}`;
+        contador.textContent = '';
+        return;
       }
       
-      document.getElementById("resultado-familia").style.display = "block";
+      loading.textContent = '';
+      contador.textContent = `Mostrando ${equipos.length} equipos de la familia ${familia}`;
+      
+      // Ordenar equipos por ID
+      equipos.sort((a, b) => a.ID.localeCompare(b.ID));
+      
+      // Llenar la tabla
+      equipos.forEach(equipo => {
+        const fila = document.createElement('tr');
+        
+        // Determinar la clase CSS según el estado
+        let estadoClass = '';
+        const estado = (equipo["STATUS ✎"] || '').toUpperCase();
+        
+        if (estado.includes('OPERATIVO')) estadoClass = 'operativo';
+        else if (estado.includes('INOPERATIVO')) estadoClass = 'inoperativo';
+        else if (estado.includes('PREVENTIVO')) estadoClass = 'preventivo';
+        else if (estado.includes('MANTENCIÓN') || estado.includes('MANTENIMIENTO')) estadoClass = 'mantencion';
+        
+        fila.innerHTML = `
+          <td>${equipo.ID || '-'}</td>
+          <td>${equipo["MODELO EQUIPO"] || '-'}</td>
+          <td class="${estadoClass}">${equipo["STATUS ✎"] || 'DESCONOCIDO'}</td>
+          <td>${equipo.OBSERVACIONES || '-'}</td>
+        `;
+        
+        tablaBody.appendChild(fila);
+      });
     }
-
-    // Permitir consultar con Enter
-    document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        consultarEquipo();
+    
+    // Event listeners
+    btnBuscar.addEventListener('click', buscarEquipos);
+    selectFamilia.addEventListener('change', function() {
+      if (this.value) {
+        buscarEquipos();
       }
     });
-
-    // Cargar todos los equipos al iniciar
-    window.addEventListener('load', cargarTodosEquipos);
   </script>
 </body>
 </html>
