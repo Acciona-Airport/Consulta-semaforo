@@ -253,17 +253,17 @@
 
     <!-- Tabla de equipos -->
     <div class="section">
-      <h2>Reporte Completo de Equipos (L1 a P550)</h2>
+      <h2>Reporte Completo de Equipos (ID a FIN)</h2>
       <button class="btn btn-actualizar" onclick="cargarTablaEquipos()">Actualizar Tabla</button>
       <div class="tabla-container">
         <table class="tabla-equipos" id="tabla-equipos">
           <thead>
             <tr>
-              <th>FAMILIA</th>
               <th>ID</th>
               <th>MODELO EQUIPO</th>
               <th>STATUS</th>
               <th>OBSERVACIONES</th>
+              <th>FIN</th>
             </tr>
           </thead>
           <tbody id="tabla-body">
@@ -280,7 +280,7 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    const RANGO_TABLA = "L1:P550"; // Rango específico que deseas mostrar
+    const RANGO_TABLA = "L1:P500"; // Columnas L (ID) a P (FIN), filas 1 a 500
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -405,11 +405,11 @@
           }
           
           fila.innerHTML = `
-            <td>${equipo.FAMILIA || ""}</td>
             <td>${equipo.ID || ""}</td>
             <td>${equipo["MODELO EQUIPO"] || ""}</td>
             <td class="${estadoClass}">${estado || ""}</td>
             <td>${equipo.OBSERVACIONES || ""}</td>
+            <td>${equipo.FIN || ""}</td>
           `;
           
           tablaBody.appendChild(fila);
