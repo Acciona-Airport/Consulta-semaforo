@@ -35,7 +35,7 @@
       gap: 10px;
       align-items: center;
     }
-    select {
+    input[type="text"] {
       padding: 10px 15px;
       border-radius: 4px;
       border: 1px solid #ddd;
@@ -111,10 +111,7 @@
     <h1>Consulta de Equipos por Familia</h1>
     
     <div class="selector-container">
-      <select id="select-familia">
-        <option value="">-- Seleccione una familia --</option>
-        <!-- Las opciones se llenarán con JavaScript -->
-      </select>
+      <input type="text" id="input-familia" placeholder="Escriba el nombre de la familia (ej. ASU)">
       <button id="btn-buscar">Buscar</button>
     </div>
     
@@ -124,121 +121,96 @@
       <table id="tabla-equipos">
         <thead>
           <tr>
+            <th>Familia</th>
             <th>ID</th>
+            <th>Marca</th>
             <th>Modelo</th>
             <th>Estado</th>
             <th>Observaciones</th>
           </tr>
         </thead>
-        <tbody id="tabla-body">
-          <!-- Los datos se llenarán aquí -->
-        </tbody>
+        <tbody id="tabla-body"></tbody>
       </table>
-      <div id="loading" class="loading">Seleccione una familia para ver los equipos</div>
+      <div id="loading" class="loading">Escriba una familia para ver los equipos</div>
     </div>
   </div>
 
   <script>
-    // URL del Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    
-    // Elementos del DOM
-    const selectFamilia = document.getElementById('select-familia');
+
+    const inputFamilia = document.getElementById('input-familia');
     const btnBuscar = document.getElementById('btn-buscar');
     const tablaBody = document.getElementById('tabla-body');
     const contador = document.getElementById('contador');
     const loading = document.getElementById('loading');
-    
-    // Lista de familias disponibles (se puede obtener dinámicamente si es necesario)
-    const familias = [
-      "ASU", "ACU", "Camión de baño", "Camión de agua", "Carro de baño", "Carro de agua",
-      "Cargo Loader Lower deck", "Cargo Loader Main Deck", "GPU 90 KVA", "GPU 180 KVA",
-      "TRACTOR AVIÓN", "TOWBARLESS", "Barra de Tiro", "EQUIPOS DE APOYO", "FURGON",
-      "Conveyor", "Escala Motorizada", "Tractor Equipaje Elec", "Tractor Equipaje Diesel",
-      "Escala Tractable", "Carro de deshielo", "Carro avih", "Carro techado", "Carro para Remoto"
-    ];
-    
-    // Llenar el select con las familias
-    familias.forEach(familia => {
-      const option = document.createElement('option');
-      option.value = familia;
-      option.textContent = familia;
-      selectFamilia.appendChild(option);
-    });
-    
-    // Función para buscar equipos por familia
+
     async function buscarEquipos() {
-      const familia = selectFamilia.value;
-      
+      const familia = inputFamilia.value.trim();
+
       if (!familia) {
-        alert('Por favor seleccione una familia');
+        alert('Por favor ingrese una familia');
         return;
       }
-      
+
       loading.textContent = 'Cargando equipos...';
       tablaBody.innerHTML = '';
-      
+      contador.textContent = '';
+
       try {
-        // Hacer la petición al Google Apps Script
         const response = await fetch(`${SCRIPT_URL}?tipo=familia&familia=${encodeURIComponent(familia)}`);
         const data = await response.json();
-        
-        if (data.error) {
-          loading.textContent = data.error;
-          contador.textContent = '';
+
+        if (data.error || !Array.isArray(data)) {
+          loading.textContent = 'No se encontraron resultados o hubo un error en la búsqueda.';
           return;
         }
-        
+
         mostrarResultados(data, familia);
       } catch (error) {
         console.error('Error al buscar equipos:', error);
         loading.textContent = 'Error al cargar los equipos';
-        contador.textContent = '';
       }
     }
-    
-    // Función para mostrar los resultados en la tabla
+
     function mostrarResultados(equipos, familia) {
       if (equipos.length === 0) {
-        loading.textContent = `No se encontraron equipos para la familia ${familia}`;
-        contador.textContent = '';
+        loading.textContent = `No se encontraron equipos para la familia "${familia}"`;
         return;
       }
-      
+
       loading.textContent = '';
-      contador.textContent = `Mostrando ${equipos.length} equipos de la familia ${familia}`;
-      
-      // Ordenar equipos por ID
+      contador.textContent = `Mostrando ${equipos.length} equipos de la familia "${familia}"`;
+
       equipos.sort((a, b) => a.ID.localeCompare(b.ID));
-      
-      // Llenar la tabla
+
       equipos.forEach(equipo => {
         const fila = document.createElement('tr');
-        
-        // Determinar la clase CSS según el estado
+
         let estadoClass = '';
         const estado = (equipo["STATUS ✎"] || '').toUpperCase();
-        
+
         if (estado.includes('OPERATIVO')) estadoClass = 'operativo';
         else if (estado.includes('INOPERATIVO')) estadoClass = 'inoperativo';
         else if (estado.includes('PREVENTIVO')) estadoClass = 'preventivo';
         else if (estado.includes('MANTENCIÓN') || estado.includes('MANTENIMIENTO')) estadoClass = 'mantencion';
-        
+
         fila.innerHTML = `
+          <td>${equipo.FAMILIA || '-'}</td>
           <td>${equipo.ID || '-'}</td>
+          <td>${equipo["MARCA EQUIPO"] || '-'}</td>
           <td>${equipo["MODELO EQUIPO"] || '-'}</td>
           <td class="${estadoClass}">${equipo["STATUS ✎"] || 'DESCONOCIDO'}</td>
           <td>${equipo.OBSERVACIONES || '-'}</td>
         `;
-        
+
         tablaBody.appendChild(fila);
       });
     }
-    
-    // Event listeners
+
     btnBuscar.addEventListener('click', buscarEquipos);
-    selectFamilia.addEventListener('change', function() {
-      if (this.value) {
+
+    inputFamilia.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
         buscarEquipos();
       }
     });
