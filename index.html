@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Consulta de Estado de Equipos - Acciona</title>
   <style>
-    /* Estilos anteriores se mantienen igual */
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,19 +30,22 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-    .logo {
-      max-width: 120px;
-      padding: 6px;
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 6px;
-      transition: transform 0.3s ease;
+    .logo-acciona {
+      max-width: 180px;
+      height: auto;
+      margin-bottom: 15px;
     }
-    .logo:hover { transform: scale(1.03); }
+    .logo-semaforo {
+      max-width: 100px;
+      height: auto;
+      margin: 10px auto 20px;
+      display: block;
+    }
     h1 {
       font-size: 16px;
       color: #111;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 5px;
     }
     label {
       display: block;
@@ -162,10 +164,12 @@
 <body>
   <div class="container">
     <div class="logo-wrapper">
-      <img class="logo" src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/LogoAcciona2.png" alt="Logo Acciona" />
+      <img src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/Acciona_logo.svg.png" alt="Logo Acciona" class="logo-acciona">
     </div>
 
     <h1>Consulta de Estado de Equipos</h1>
+    <img src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/semaforo.png.png" alt="Semaforo" class="logo-semaforo">
+    
     <div class="datetime-box" id="datetime"></div>
 
     <div class="section">
