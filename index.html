@@ -21,7 +21,7 @@
       padding: 25px;
       border-radius: 18px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 900px;
+      max-width: 1200px;
       width: 100%;
       border: 1px solid #ccc;
     }
@@ -253,17 +253,18 @@
 
     <!-- Tabla de equipos -->
     <div class="section">
-      <h2>Reporte Completo de Equipos (ID a FIN)</h2>
+      <h2>Reporte Completo de Equipos (A1:G500)</h2>
       <button class="btn btn-actualizar" onclick="cargarTablaEquipos()">Actualizar Tabla</button>
       <div class="tabla-container">
         <table class="tabla-equipos" id="tabla-equipos">
           <thead>
             <tr>
               <th>ID</th>
+              <th>FAMILIA</th>
+              <th>MARCA EQUIPO</th>
               <th>MODELO EQUIPO</th>
               <th>STATUS</th>
               <th>OBSERVACIONES</th>
-              <th>FIN</th>
             </tr>
           </thead>
           <tbody id="tabla-body">
@@ -280,7 +281,7 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    const RANGO_TABLA = "L1:P500"; // Columnas L (ID) a P (FIN), filas 1 a 500
+    const RANGO_TABLA = "A1:G500"; // Columnas A a G, filas 1 a 500
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -406,10 +407,11 @@
           
           fila.innerHTML = `
             <td>${equipo.ID || ""}</td>
+            <td>${equipo.FAMILIA || ""}</td>
+            <td>${equipo["MARCA EQUIPO"] || ""}</td>
             <td>${equipo["MODELO EQUIPO"] || ""}</td>
             <td class="${estadoClass}">${estado || ""}</td>
             <td>${equipo.OBSERVACIONES || ""}</td>
-            <td>${equipo.FIN || ""}</td>
           `;
           
           tablaBody.appendChild(fila);
