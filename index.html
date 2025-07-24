@@ -141,6 +141,21 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+    .btn {
+      background-color: #c62828;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #b71c1c;
+    }
   </style>
 </head>
 <body>
@@ -245,22 +260,29 @@
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
-          // Mostrar detalles según el estado
+          // Determinar icono y clase según el estado
           let estadoClass = "status-otros";
           let icono = "";
           
           if (estado.includes("OPERATIVO")) {
             estadoClass = "status-operativo";
-            icono = "✅ ";
-          } else if (estado.includes("INOPERATIVO")) {
+            icono = "✅ OPERATIVO";
+          } else if (estado.includes("FUERA DE OPERACION") || 
+                     estado.includes("INOPERATIVO") || 
+                     estado.includes("PREVENTIVO") || 
+                     estado.includes("REVISIÓN") || 
+                     estado.includes("LAVADO") ||
+                     estado.includes("MANTENCIÓN")) {
             estadoClass = "status-inoperativo";
-            icono = "❌ ";
-          } else if (estado.includes("PREVENTIVO") || estado.includes("MANTENCIÓN")) {
+            icono = "❌ " + estado;
+          } else if (estado.includes("PREVENTIVO")) {
             estadoClass = "status-preventivo";
-            icono = "🛠️ ";
+            icono = "🛠️ " + estado;
+          } else {
+            icono = estado;
           }
           
-          statusDetalle.innerHTML = icono + estado;
+          statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
           
           // Mostrar observaciones
