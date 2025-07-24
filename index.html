@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Consulta de Estado de Equipos - Acciona</title>
   <style>
+    /* Estilos anteriores se mantienen igual */
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -260,21 +261,24 @@
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
-          // Determinar clase según el estado
+          // Determinar clase según el estado (comparación exacta)
           let estadoClass = "status-otros";
           let icono = "";
           
-          if (estado.includes("OPERATIVO")) {
+          if (estado === "OPERATIVO") {
             estadoClass = "status-operativo";
             icono = "✅ " + estado;
-          } else if (estado.includes("FUERA DE OPERACION") || 
-                     estado.includes("INOPERATIVO") || 
-                     estado.includes("PREVENTIVO") || 
-                     estado.includes("REVISIÓN") || 
-                     estado.includes("LAVADO") ||
-                     estado.includes("MANTENCIÓN")) {
+          } else if (estado === "INOPERATIVO" || 
+                     estado === "FUERA DE OPERACION" || 
+                     estado === "PREVENTIVO" || 
+                     estado === "REVISIÓN" || 
+                     estado === "LAVADO" ||
+                     estado === "MANTENCIÓN") {
             estadoClass = "status-inoperativo";
             icono = "❌ " + estado;
+          } else if (estado === "PREVENTIVO") {
+            estadoClass = "status-preventivo";
+            icono = "🛠️ " + estado;
           } else {
             icono = estado;
           }
