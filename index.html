@@ -1,217 +1,285 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consulta de Equipos por Familia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consulta de Estado de Equipos - Acciona</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 15px;
       margin: 0;
-      padding: 20px;
-      background-color: #f5f5f5;
     }
     .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      background-color: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      max-width: 480px;
+      width: 100%;
+      border: 1px solid #ccc;
     }
-    h1 {
-      color: #333;
-      text-align: center;
-      margin-bottom: 30px;
+    .logo-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
     }
     .logo {
+      max-width: 120px;
+      padding: 6px;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 6px;
+      transition: transform 0.3s ease;
+    }
+    .logo:hover { transform: scale(1.03); }
+    h1 {
+      font-size: 16px;
+      color: #111;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
       display: block;
-      margin: 0 auto 20px;
-      max-width: 150px;
-    }
-    .selector-container {
-      margin-bottom: 30px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    input[type="text"] {
-      padding: 10px 15px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-      flex-grow: 1;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #c62828;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #b71c1c;
-    }
-    .tabla-container {
-      overflow-x: auto;
-      margin-top: 20px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #f2f2f2;
-      position: sticky;
-      top: 0;
-    }
-    tr:hover {
-      background-color: #f9f9f9;
-    }
-    .operativo {
-      color: #2e7d32;
-      font-weight: bold;
-    }
-    .inoperativo {
-      color: #c62828;
-      font-weight: bold;
-    }
-    .preventivo {
-      color: #ff8f00;
-      font-weight: bold;
-    }
-    .mantencion {
-      color: #0277bd;
-      font-weight: bold;
-    }
-    .contador {
-      margin: 15px 0;
+      margin-top: 14px;
+      margin-bottom: 6px;
       font-weight: bold;
       color: #333;
+      font-size: 14px;
     }
-    .loading {
+    .section { margin-bottom: 20px; }
+    .input-estilo {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      background-color: #fafafa;
+      color: #000;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      resize: none;
+    }
+    .input-estilo:focus {
+      border-color: #c62828;
+      box-shadow: 0 0 5px rgba(198, 40, 40, 0.4);
+      outline: none;
+    }
+    .datetime-box {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      padding: 10px;
       text-align: center;
-      padding: 20px;
-      color: #666;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #222;
+    }
+    .status-box {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .status-operativo {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status-inoperativo {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .status-preventivo {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+    .status-otros {
+      background-color: #e2e3e5;
+      color: #383d41;
+      border: 1px solid #d6d8db;
+    }
+    .spinner {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(198, 40, 40, 0.3);
+      border-top-color: #c62828;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      display: none;
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #overlay .loader {
+      width: 60px;
+      height: 60px;
+      border: 6px solid rgba(198, 40, 40, 0.2);
+      border-top: 6px solid #c62828;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/LogoAcciona2.png" alt="Logo Acciona" class="logo">
-    <h1>Consulta de Equipos por Familia</h1>
-    
-    <div class="selector-container">
-      <input type="text" id="input-familia" placeholder="Escriba el nombre de la familia (ej. ASU)">
-      <button id="btn-buscar">Buscar</button>
+    <div class="logo-wrapper">
+      <img class="logo" src="https://raw.githubusercontent.com/acciona-airport/Zarpes-acciona-aero/main/LogoAcciona2.png" alt="Logo Acciona" />
     </div>
-    
-    <div id="contador" class="contador"></div>
-    
-    <div class="tabla-container">
-      <table id="tabla-equipos">
-        <thead>
-          <tr>
-            <th>Familia</th>
-            <th>ID</th>
-            <th>Marca</th>
-            <th>Modelo</th>
-            <th>Estado</th>
-            <th>Observaciones</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-body"></tbody>
-      </table>
-      <div id="loading" class="loading">Escriba una familia para ver los equipos</div>
+
+    <h1>Consulta de Estado de Equipos</h1>
+    <div class="datetime-box" id="datetime"></div>
+
+    <div class="section">
+      <label for="numero-equipo">Número de equipo:</label>
+      <input type="text" class="input-estilo" id="numero-equipo" placeholder="Ej: 51115" />
+      <button class="btn" onclick="consultarEstado()">Consultar Estado</button>
+    </div>
+
+    <div class="section">
+      <label>Familia del equipo:</label>
+      <div class="input-estilo" id="familia-equipo"></div>
+    </div>
+
+    <div class="section">
+      <label>Estado actual:</label>
+      <div class="input-estilo" id="status-equipo"></div>
+      <div id="status-detalle" class="status-box"></div>
+    </div>
+
+    <div class="section">
+      <label>Observaciones:</label>
+      <div class="input-estilo" id="observaciones-equipo"></div>
     </div>
   </div>
 
+  <div id="overlay">
+    <div class="loader"></div>
+  </div>
+
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
 
-    const inputFamilia = document.getElementById('input-familia');
-    const btnBuscar = document.getElementById('btn-buscar');
-    const tablaBody = document.getElementById('tabla-body');
-    const contador = document.getElementById('contador');
-    const loading = document.getElementById('loading');
+    function actualizarFechaHora() {
+      const now = new Date();
+      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const diaSemana = dias[now.getDay()];
+      const dia = now.getDate();
+      const mes = meses[now.getMonth()];
+      const anio = now.getFullYear();
+      let hora = now.getHours();
+      const minutos = String(now.getMinutes()).padStart(2, '0');
+      const segundos = String(now.getSeconds()).padStart(2, '0');
+      const ampm = hora >= 12 ? 'P.M' : 'A.M';
+      hora = hora % 12 || 12;
+      const fechaFormateada = `${diaSemana}, ${dia} de ${mes} de ${anio}, ${hora}:${minutos}:${segundos} ${ampm}`;
+      document.getElementById("datetime").innerText = fechaFormateada;
+    }
+    setInterval(actualizarFechaHora, 1000);
+    actualizarFechaHora();
 
-    async function buscarEquipos() {
-      const familia = inputFamilia.value.trim();
+    function mostrarOverlay(mostrar) {
+      document.getElementById("overlay").style.display = mostrar ? "flex" : "none";
+    }
 
-      if (!familia) {
-        alert('Por favor ingrese una familia');
+    function limpiarResultados() {
+      document.getElementById("familia-equipo").innerText = "";
+      document.getElementById("status-equipo").innerText = "";
+      document.getElementById("status-detalle").innerText = "";
+      document.getElementById("status-detalle").className = "status-box";
+      document.getElementById("observaciones-equipo").innerText = "";
+    }
+
+    async function consultarEstado() {
+      const id = document.getElementById("numero-equipo").value.trim();
+      const familiaBox = document.getElementById("familia-equipo");
+      const statusBox = document.getElementById("status-equipo");
+      const statusDetalle = document.getElementById("status-detalle");
+      const obsBox = document.getElementById("observaciones-equipo");
+
+      if (!id) {
+        alert("Por favor ingrese un número de equipo");
         return;
       }
 
-      loading.textContent = 'Cargando equipos...';
-      tablaBody.innerHTML = '';
-      contador.textContent = '';
+      limpiarResultados();
+      mostrarOverlay(true);
 
       try {
-        const response = await fetch(`${SCRIPT_URL}?tipo=familia&familia=${encodeURIComponent(familia)}`);
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
         const data = await response.json();
 
-        if (data.error || !Array.isArray(data)) {
-          loading.textContent = 'No se encontraron resultados o hubo un error en la búsqueda.';
-          return;
+        if (data.error) {
+          familiaBox.innerText = "Equipo no encontrado";
+          statusBox.innerText = "N/A";
+          statusDetalle.innerText = "El equipo no existe en la base de datos";
+          statusDetalle.className = "status-box status-otros";
+        } else {
+          // Mostrar información del equipo
+          familiaBox.innerText = data.FAMILIA || "Sin información";
+          
+          // Obtener estado (asumiendo que está en la columna E)
+          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
+          statusBox.innerText = "Estado: " + estado;
+          
+          // Mostrar detalles según el estado
+          let estadoClass = "status-otros";
+          let icono = "";
+          
+          if (estado.includes("OPERATIVO")) {
+            estadoClass = "status-operativo";
+            icono = "✅ ";
+          } else if (estado.includes("INOPERATIVO")) {
+            estadoClass = "status-inoperativo";
+            icono = "❌ ";
+          } else if (estado.includes("PREVENTIVO") || estado.includes("MANTENCIÓN")) {
+            estadoClass = "status-preventivo";
+            icono = "🛠️ ";
+          }
+          
+          statusDetalle.innerHTML = icono + estado;
+          statusDetalle.className = "status-box " + estadoClass;
+          
+          // Mostrar observaciones
+          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
-
-        mostrarResultados(data, familia);
       } catch (error) {
-        console.error('Error al buscar equipos:', error);
-        loading.textContent = 'Error al cargar los equipos';
+        console.error("Error al consultar:", error);
+        statusBox.innerText = "Error";
+        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        statusDetalle.className = "status-box status-inoperativo";
+      } finally {
+        mostrarOverlay(false);
       }
     }
 
-    function mostrarResultados(equipos, familia) {
-      if (equipos.length === 0) {
-        loading.textContent = `No se encontraron equipos para la familia "${familia}"`;
-        return;
-      }
-
-      loading.textContent = '';
-      contador.textContent = `Mostrando ${equipos.length} equipos de la familia "${familia}"`;
-
-      equipos.sort((a, b) => a.ID.localeCompare(b.ID));
-
-      equipos.forEach(equipo => {
-        const fila = document.createElement('tr');
-
-        let estadoClass = '';
-        const estado = (equipo["STATUS ✎"] || '').toUpperCase();
-
-        if (estado.includes('OPERATIVO')) estadoClass = 'operativo';
-        else if (estado.includes('INOPERATIVO')) estadoClass = 'inoperativo';
-        else if (estado.includes('PREVENTIVO')) estadoClass = 'preventivo';
-        else if (estado.includes('MANTENCIÓN') || estado.includes('MANTENIMIENTO')) estadoClass = 'mantencion';
-
-        fila.innerHTML = `
-          <td>${equipo.FAMILIA || '-'}</td>
-          <td>${equipo.ID || '-'}</td>
-          <td>${equipo["MARCA EQUIPO"] || '-'}</td>
-          <td>${equipo["MODELO EQUIPO"] || '-'}</td>
-          <td class="${estadoClass}">${equipo["STATUS ✎"] || 'DESCONOCIDO'}</td>
-          <td>${equipo.OBSERVACIONES || '-'}</td>
-        `;
-
-        tablaBody.appendChild(fila);
-      });
-    }
-
-    btnBuscar.addEventListener('click', buscarEquipos);
-
-    inputFamilia.addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        buscarEquipos();
+    // Permitir consultar con Enter
+    document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        consultarEstado();
       }
     });
   </script>
