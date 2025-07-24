@@ -212,6 +212,10 @@
       color: #383d41;
       font-weight: bold;
     }
+    .btn-actualizar {
+      background-color: #2e7d32;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -249,9 +253,10 @@
 
     <!-- Tabla de equipos -->
     <div class="section">
-      <h2>Reporte Completo de Equipos</h2>
+      <h2>Reporte Completo de Equipos (L1 a P550)</h2>
+      <button class="btn btn-actualizar" onclick="cargarTablaEquipos()">Actualizar Tabla</button>
       <div class="tabla-container">
-        <table class="tabla-equipos">
+        <table class="tabla-equipos" id="tabla-equipos">
           <thead>
             <tr>
               <th>FAMILIA</th>
@@ -261,148 +266,8 @@
               <th>OBSERVACIONES</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>ASU</td>
-              <td>5703</td>
-              <td>TR/TMAC 250</td>
-              <td class="status-inoperativo-tabla">INOPERATIVO</td>
-              <td>PROBLEMAS DE ENCENDIDO</td>
-            </tr>
-            <tr>
-              <td>ASU</td>
-              <td>5712</td>
-              <td>ASU-600-270-DDP</td>
-              <td class="status-fuera-tabla">FUERA DE OPERACION</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>ASU</td>
-              <td>5715</td>
-              <td>ASU-600-300-DDP</td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>ACU</td>
-              <td>5718</td>
-              <td>ACU-802-CUP</td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>ASU</td>
-              <td>5719</td>
-              <td>ASU-600-300-DDP</td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>ACU</td>
-              <td>5720</td>
-              <td>ACU-802-CUP</td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>ACU</td>
-              <td>5721</td>
-              <td>ACU-802-H</td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Camion de baño</td>
-              <td>5609</td>
-              <td>LSP-900</td>
-              <td class="status-inoperativo-tabla">INOPERATIVO</td>
-              <td>CULATA // Pasa a reparación mayor, info entregada 23-07 17 Hs FM AJ to JS</td>
-            </tr>
-            <tr>
-              <td>Camion de agua</td>
-              <td>5610</td>
-              <td>WSP-900</td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <!-- Continuar con el resto de los datos... -->
-            <tr>
-              <td>Carro techado</td>
-              <td>9095</td>
-              <td></td>
-              <td class="status-fuera-tabla">FUERA DE OPERACION</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6558</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6478</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6569</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6440</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6517</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>7465</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6528</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>7415</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6438</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Carro para Remoto</td>
-              <td>6456</td>
-              <td></td>
-              <td class="status-operativo-tabla">OPERATIVO</td>
-              <td>, ESTAN A PARTIR DE LA COLUMNA L1 HASTA P550</td>
-            </tr>
+          <tbody id="tabla-body">
+            <!-- Los datos se cargarán dinámicamente -->
           </tbody>
         </table>
       </div>
@@ -415,6 +280,7 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    const RANGO_TABLA = "L1:P550"; // Rango específico que deseas mostrar
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -472,14 +338,11 @@
           statusDetalle.innerText = "El equipo no existe en la base de datos";
           statusDetalle.className = "status-box status-otros";
         } else {
-          // Mostrar información del equipo
           familiaBox.innerText = data.FAMILIA || "Sin información";
           
-          // Obtener estado
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
-          // Determinar clase según el estado (comparación exacta)
           let estadoClass = "status-otros";
           let icono = "";
           
@@ -501,11 +364,8 @@
             icono = estado;
           }
           
-          // Mostrar el estado completo en el cuadro inferior
           statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
-          
-          // Mostrar observaciones
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
@@ -517,6 +377,53 @@
         mostrarOverlay(false);
       }
     }
+
+    async function cargarTablaEquipos() {
+      mostrarOverlay(true);
+      try {
+        const response = await fetch(URL_GET + "?tipo=tabla&rango=" + encodeURIComponent(RANGO_TABLA));
+        const data = await response.json();
+        
+        const tablaBody = document.getElementById("tabla-body");
+        tablaBody.innerHTML = "";
+        
+        data.forEach(equipo => {
+          const fila = document.createElement("tr");
+          
+          // Determinar clase de estado para la fila
+          let estadoClass = "";
+          const estado = (equipo["STATUS ✎"] || "").toUpperCase();
+          
+          if (estado === "OPERATIVO") {
+            estadoClass = "status-operativo-tabla";
+          } else if (estado === "INOPERATIVO") {
+            estadoClass = "status-inoperativo-tabla";
+          } else if (estado === "PREVENTIVO") {
+            estadoClass = "status-preventivo-tabla";
+          } else if (estado === "FUERA DE OPERACION" || estado === "REVISIÓN") {
+            estadoClass = "status-fuera-tabla";
+          }
+          
+          fila.innerHTML = `
+            <td>${equipo.FAMILIA || ""}</td>
+            <td>${equipo.ID || ""}</td>
+            <td>${equipo["MODELO EQUIPO"] || ""}</td>
+            <td class="${estadoClass}">${estado || ""}</td>
+            <td>${equipo.OBSERVACIONES || ""}</td>
+          `;
+          
+          tablaBody.appendChild(fila);
+        });
+      } catch (error) {
+        console.error("Error al cargar tabla:", error);
+        alert("Error al cargar los datos de la tabla");
+      } finally {
+        mostrarOverlay(false);
+      }
+    }
+
+    // Cargar tabla al iniciar
+    document.addEventListener("DOMContentLoaded", cargarTablaEquipos);
 
     // Permitir consultar con Enter
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
