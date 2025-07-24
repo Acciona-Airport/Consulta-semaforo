@@ -21,7 +21,7 @@
       padding: 25px;
       border-radius: 18px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 480px;
+      max-width: 800px;
       width: 100%;
       border: 1px solid #ccc;
     }
@@ -141,30 +141,102 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-
-    /* Nueva sección: lista por familia */
-    .familia {
-      margin: 30px auto;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      max-width: 960px;
-      border: 1px solid #ccc;
+    
+    .btn {
+      background-color: #c62828;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
     }
-    .familia h2 {
-      margin-bottom: 10px;
-      color: #333;
-      border-bottom: 2px solid #ccc;
-      padding-bottom: 5px;
+    .btn:hover {
+      background-color: #b71c1c;
     }
-    .familia ul {
-      list-style: none;
-      padding-left: 0;
-      column-count: 3;
+    
+    .btn-secundario {
+      background-color: #4a6baf;
+      margin-left: 10px;
     }
-    .familia li {
-      padding: 2px 0;
+    .btn-secundario:hover {
+      background-color: #3a5a9f;
+    }
+    
+    select.input-estilo {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 15px;
+    }
+    
+    .tabla-equipos {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    
+    .tabla-equipos th, .tabla-equipos td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    .tabla-equipos th {
+      background-color: #f2f2f2;
+      position: sticky;
+      top: 0;
+    }
+    
+    .tabla-equipos tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    .tabla-equipos tr:hover {
+      background-color: #f1f1f1;
+    }
+    
+    .tabla-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    
+    .operativo {
+      color: #155724;
+      font-weight: bold;
+    }
+    
+    .inoperativo {
+      color: #721c24;
+      font-weight: bold;
+    }
+    
+    .preventivo {
+      color: #856404;
+      font-weight: bold;
+    }
+    
+    .filtros {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .filtro-grupo {
+      flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .filtros {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -177,71 +249,92 @@
     <h1>Consulta de Estado de Equipos</h1>
     <div class="datetime-box" id="datetime"></div>
 
-    <div class="section">
-      <label for="numero-equipo">Número de equipo:</label>
-      <input type="text" class="input-estilo" id="numero-equipo" placeholder="Ej: 51115" />
-      <button class="btn" onclick="consultarEstado()">Consultar Estado</button>
+    <div class="filtros">
+      <div class="filtro-grupo">
+        <label for="numero-equipo">Buscar por número de equipo:</label>
+        <input type="text" class="input-estilo" id="numero-equipo" placeholder="Ej: 51115" />
+        <button class="btn" onclick="consultarEquipo()">Consultar Equipo</button>
+      </div>
+      
+      <div class="filtro-grupo">
+        <label for="familia-equipo">Buscar por familia:</label>
+        <select class="input-estilo" id="familia-equipo">
+          <option value="">Seleccione una familia</option>
+          <option value="ASU">ASU</option>
+          <option value="ACU">ACU</option>
+          <option value="Camión de baño">Camión de baño</option>
+          <option value="Camión de agua">Camión de agua</option>
+          <option value="Carro de baño">Carro de baño</option>
+          <option value="Carro de agua">Carro de agua</option>
+          <option value="Cargo Loader Lower deck">Cargo Loader Lower deck</option>
+          <option value="Cargo Loader Main Deck">Cargo Loader Main Deck</option>
+          <option value="GPU 90 KVA">GPU 90 KVA</option>
+          <option value="GPU 180 KVA">GPU 180 KVA</option>
+          <option value="TRACTOR AVIÓN">TRACTOR AVIÓN</option>
+          <option value="TOWBARLESS">TOWBARLESS</option>
+          <option value="Barra de Tiro">Barra de Tiro</option>
+          <option value="EQUIPOS DE APOYO">EQUIPOS DE APOYO</option>
+          <option value="FURGON">FURGON</option>
+          <option value="Conveyor">Conveyor</option>
+          <option value="Escala Motorizada">Escala Motorizada</option>
+          <option value="Tractor Equipaje Elec">Tractor Equipaje Elec</option>
+          <option value="Tractor Equipaje Diesel">Tractor Equipaje Diesel</option>
+          <option value="Escala Tractable">Escala Tractable</option>
+          <option value="Carro de deshielo">Carro de deshielo</option>
+          <option value="Carro avih">Carro avih</option>
+          <option value="Carro techado">Carro techado</option>
+          <option value="Carro para Remoto">Carro para Remoto</option>
+        </select>
+        <button class="btn btn-secundario" onclick="consultarFamilia()">Mostrar Equipos</button>
+      </div>
     </div>
 
-    <div class="section">
-      <label>Familia del equipo:</label>
-      <div class="input-estilo" id="familia-equipo"></div>
+    <div id="resultado-individual" class="section" style="display: none;">
+      <h2>Información del Equipo</h2>
+      <div class="section">
+        <label>Familia del equipo:</label>
+        <div class="input-estilo" id="familia-info"></div>
+      </div>
+
+      <div class="section">
+        <label>Estado actual:</label>
+        <div class="input-estilo" id="status-equipo"></div>
+        <div id="status-detalle" class="status-box"></div>
+      </div>
+
+      <div class="section">
+        <label>Observaciones:</label>
+        <div class="input-estilo" id="observaciones-equipo"></div>
+      </div>
     </div>
 
-    <div class="section">
-      <label>Estado actual:</label>
-      <div class="input-estilo" id="status-equipo"></div>
-      <div id="status-detalle" class="status-box"></div>
-    </div>
-
-    <div class="section">
-      <label>Observaciones:</label>
-      <div class="input-estilo" id="observaciones-equipo"></div>
+    <div id="resultado-familia" class="section" style="display: none;">
+      <h2>Equipos de la familia: <span id="nombre-familia"></span></h2>
+      <div class="tabla-container">
+        <table class="tabla-equipos" id="tabla-equipos">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Familia</th>
+              <th>Estado</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo-tabla">
+            <!-- Aquí se llenarán los datos -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
-  <!-- NUEVA SECCIÓN DE EQUIPOS POR FAMILIA -->
-  <div id="contenedor"></div>
 
   <div id="overlay">
     <div class="loader"></div>
   </div>
 
   <script>
-    const data = {
-      "ASU": [5703,5712,5715,5719],
-      "ACU": [5718,5720,5721],
-      "Camión de baño": [5609,5611,5613],
-      "Camión de agua": [5610,5612,5614],
-      "Carro de baño": [5615,5617],
-      "Carro de agua": [5616,5618],
-      "CARRO DE AGUA": [56302],
-      "CARRO DE BAÑO": [56301],
-      "Cargo Loader Lower deck": [5406,5411,5412,5413,5418,5421,5428,5429,5430,5431,5432,900619,900620],
-      "Cargo Loader Main Deck": [5416,5419,5420,5422,5423,5425,5426],
-      "Cargo Loader Main Deck Plus": [5424],
-      "GPU 90 KVA": [5027,5038,5041,5048,5049,5050,5051,5052,5054,5055,5056,5057,5058,50303,50306,50307,50308,50311,50313,50304],
-      "GPU 180 KVA": [5043,5044,5045,5046,5053,5059,5060]
-    };
-
-    const contenedor = document.getElementById("contenedor");
-    for (const familia in data) {
-      const div = document.createElement("div");
-      div.className = "familia";
-      const h2 = document.createElement("h2");
-      h2.textContent = `${familia} (${data[familia].length})`;
-      div.appendChild(h2);
-      const ul = document.createElement("ul");
-      data[familia].forEach(id => {
-        const li = document.createElement("li");
-        li.textContent = `ID: ${id}`;
-        ul.appendChild(li);
-      });
-      div.appendChild(ul);
-      contenedor.appendChild(div);
-    }
-
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    let todosEquipos = [];
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -267,20 +360,34 @@
     }
 
     function limpiarResultados() {
-      document.getElementById("familia-equipo").innerText = "";
+      document.getElementById("familia-info").innerText = "";
       document.getElementById("status-equipo").innerText = "";
       document.getElementById("status-detalle").innerText = "";
       document.getElementById("status-detalle").className = "status-box";
       document.getElementById("observaciones-equipo").innerText = "";
+      document.getElementById("resultado-individual").style.display = "none";
+      document.getElementById("resultado-familia").style.display = "none";
     }
 
-    async function consultarEstado() {
-      const id = document.getElementById("numero-equipo").value.trim();
-      const familiaBox = document.getElementById("familia-equipo");
-      const statusBox = document.getElementById("status-equipo");
-      const statusDetalle = document.getElementById("status-detalle");
-      const obsBox = document.getElementById("observaciones-equipo");
+    // Cargar todos los equipos al iniciar la página
+    async function cargarTodosEquipos() {
+      mostrarOverlay(true);
+      try {
+        const response = await fetch(URL_GET + "?tipo=todos");
+        const data = await response.json();
+        todosEquipos = data;
+      } catch (error) {
+        console.error("Error al cargar equipos:", error);
+        alert("Error al cargar la lista de equipos");
+      } finally {
+        mostrarOverlay(false);
+      }
+    }
 
+    // Consultar un equipo individual
+    async function consultarEquipo() {
+      const id = document.getElementById("numero-equipo").value.trim();
+      
       if (!id) {
         alert("Por favor ingrese un número de equipo");
         return;
@@ -294,16 +401,19 @@
         const data = await response.json();
 
         if (data.error) {
-          familiaBox.innerText = "Equipo no encontrado";
-          statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
-          statusDetalle.className = "status-box status-otros";
+          alert("Equipo no encontrado");
         } else {
-          familiaBox.innerText = data.FAMILIA || "Sin información";
+          // Mostrar información del equipo
+          document.getElementById("familia-info").innerText = data.FAMILIA || "Sin información";
+          
+          // Obtener estado (asumiendo que está en la columna E)
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
+          document.getElementById("status-equipo").innerText = "Estado: " + estado;
+          
+          // Mostrar detalles según el estado
           let estadoClass = "status-otros";
           let icono = "";
+          
           if (estado.includes("OPERATIVO")) {
             estadoClass = "status-operativo";
             icono = "✅ ";
@@ -314,25 +424,112 @@
             estadoClass = "status-preventivo";
             icono = "🛠️ ";
           }
-          statusDetalle.innerHTML = icono + estado;
-          statusDetalle.className = "status-box " + estadoClass;
-          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
+          
+          document.getElementById("status-detalle").innerHTML = icono + estado;
+          document.getElementById("status-detalle").className = "status-box " + estadoClass;
+          
+          // Mostrar observaciones
+          document.getElementById("observaciones-equipo").innerText = data.OBSERVACIONES || "Sin observaciones";
+          
+          // Mostrar sección de resultados individuales
+          document.getElementById("resultado-individual").style.display = "block";
         }
       } catch (error) {
         console.error("Error al consultar:", error);
-        statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
-        statusDetalle.className = "status-box status-inoperativo";
+        alert("Ocurrió un error al consultar el equipo");
       } finally {
         mostrarOverlay(false);
       }
     }
 
+    // Consultar equipos por familia
+    async function consultarFamilia() {
+      const familia = document.getElementById("familia-equipo").value;
+      
+      if (!familia) {
+        alert("Por favor seleccione una familia");
+        return;
+      }
+
+      limpiarResultados();
+      mostrarOverlay(true);
+
+      try {
+        // Si ya tenemos los equipos cargados, los filtramos localmente
+        if (todosEquipos.length > 0) {
+          filtrarYMostrarEquipos(familia);
+        } else {
+          // Si no, hacemos una consulta al servidor
+          const response = await fetch(URL_GET + "?tipo=familia&familia=" + encodeURIComponent(familia));
+          const data = await response.json();
+          
+          if (data.error) {
+            alert("Error al obtener equipos de esta familia");
+          } else {
+            mostrarEquiposFamilia(data, familia);
+          }
+        }
+      } catch (error) {
+        console.error("Error al consultar familia:", error);
+        alert("Ocurrió un error al consultar la familia");
+      } finally {
+        mostrarOverlay(false);
+      }
+    }
+
+    // Filtrar equipos ya cargados
+    function filtrarYMostrarEquipos(familia) {
+      const equiposFiltrados = todosEquipos.filter(equipo => 
+        equipo.FAMILIA && equipo.FAMILIA.toUpperCase() === familia.toUpperCase()
+      );
+      mostrarEquiposFamilia(equiposFiltrados, familia);
+    }
+
+    // Mostrar los equipos de una familia en la tabla
+    function mostrarEquiposFamilia(equipos, familia) {
+      document.getElementById("nombre-familia").textContent = familia;
+      
+      const cuerpoTabla = document.getElementById("cuerpo-tabla");
+      cuerpoTabla.innerHTML = "";
+      
+      if (equipos.length === 0) {
+        cuerpoTabla.innerHTML = "<tr><td colspan='4'>No se encontraron equipos para esta familia</td></tr>";
+      } else {
+        equipos.forEach(equipo => {
+          const estado = (equipo["STATUS ✎"] || "Desconocido").toUpperCase();
+          let claseEstado = "";
+          
+          if (estado.includes("OPERATIVO")) {
+            claseEstado = "operativo";
+          } else if (estado.includes("INOPERATIVO")) {
+            claseEstado = "inoperativo";
+          } else if (estado.includes("PREVENTIVO") || estado.includes("MANTENCIÓN")) {
+            claseEstado = "preventivo";
+          }
+          
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${equipo.ID || ""}</td>
+            <td>${equipo.FAMILIA || ""}</td>
+            <td class="${claseEstado}">${estado}</td>
+            <td>${equipo.OBSERVACIONES || ""}</td>
+          `;
+          cuerpoTabla.appendChild(fila);
+        });
+      }
+      
+      document.getElementById("resultado-familia").style.display = "block";
+    }
+
+    // Permitir consultar con Enter
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
-        consultarEstado();
+        consultarEquipo();
       }
     });
+
+    // Cargar todos los equipos al iniciar
+    window.addEventListener('load', cargarTodosEquipos);
   </script>
 </body>
 </html>
