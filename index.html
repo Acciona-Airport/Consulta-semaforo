@@ -21,7 +21,7 @@
       padding: 25px;
       border-radius: 18px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 480px;
+      max-width: 900px;
       width: 100%;
       border: 1px solid #ccc;
     }
@@ -163,6 +163,55 @@
     .btn:hover {
       background-color: #b71c1c;
     }
+    
+    /* Estilos para la tabla */
+    .tabla-equipos {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      font-size: 12px;
+    }
+    .tabla-equipos th {
+      background-color: #c62828;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .tabla-equipos td {
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+    .tabla-equipos tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .tabla-equipos tr:hover {
+      background-color: #f1f1f1;
+    }
+    .tabla-container {
+      max-height: 500px;
+      overflow-y: auto;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .status-operativo-tabla {
+      color: #155724;
+      font-weight: bold;
+    }
+    .status-inoperativo-tabla {
+      color: #721c24;
+      font-weight: bold;
+    }
+    .status-preventivo-tabla {
+      color: #856404;
+      font-weight: bold;
+    }
+    .status-fuera-tabla {
+      color: #383d41;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -196,6 +245,167 @@
     <div class="section">
       <label>Observaciones:</label>
       <div class="input-estilo" id="observaciones-equipo"></div>
+    </div>
+
+    <!-- Tabla de equipos -->
+    <div class="section">
+      <h2>Reporte Completo de Equipos</h2>
+      <div class="tabla-container">
+        <table class="tabla-equipos">
+          <thead>
+            <tr>
+              <th>FAMILIA</th>
+              <th>ID</th>
+              <th>MODELO EQUIPO</th>
+              <th>STATUS</th>
+              <th>OBSERVACIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ASU</td>
+              <td>5703</td>
+              <td>TR/TMAC 250</td>
+              <td class="status-inoperativo-tabla">INOPERATIVO</td>
+              <td>PROBLEMAS DE ENCENDIDO</td>
+            </tr>
+            <tr>
+              <td>ASU</td>
+              <td>5712</td>
+              <td>ASU-600-270-DDP</td>
+              <td class="status-fuera-tabla">FUERA DE OPERACION</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>ASU</td>
+              <td>5715</td>
+              <td>ASU-600-300-DDP</td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>ACU</td>
+              <td>5718</td>
+              <td>ACU-802-CUP</td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>ASU</td>
+              <td>5719</td>
+              <td>ASU-600-300-DDP</td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>ACU</td>
+              <td>5720</td>
+              <td>ACU-802-CUP</td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>ACU</td>
+              <td>5721</td>
+              <td>ACU-802-H</td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Camion de baño</td>
+              <td>5609</td>
+              <td>LSP-900</td>
+              <td class="status-inoperativo-tabla">INOPERATIVO</td>
+              <td>CULATA // Pasa a reparación mayor, info entregada 23-07 17 Hs FM AJ to JS</td>
+            </tr>
+            <tr>
+              <td>Camion de agua</td>
+              <td>5610</td>
+              <td>WSP-900</td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <!-- Continuar con el resto de los datos... -->
+            <tr>
+              <td>Carro techado</td>
+              <td>9095</td>
+              <td></td>
+              <td class="status-fuera-tabla">FUERA DE OPERACION</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6558</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6478</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6569</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6440</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6517</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>7465</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6528</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>7415</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6438</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Carro para Remoto</td>
+              <td>6456</td>
+              <td></td>
+              <td class="status-operativo-tabla">OPERATIVO</td>
+              <td>, ESTAN A PARTIR DE LA COLUMNA L1 HASTA P550</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
