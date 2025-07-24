@@ -256,17 +256,17 @@
           // Mostrar información del equipo
           familiaBox.innerText = data.FAMILIA || "Sin información";
           
-          // Obtener estado (asumiendo que está en la columna E)
+          // Obtener estado
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
-          // Determinar icono y clase según el estado
+          // Determinar clase según el estado
           let estadoClass = "status-otros";
           let icono = "";
           
           if (estado.includes("OPERATIVO")) {
             estadoClass = "status-operativo";
-            icono = "✅ OPERATIVO";
+            icono = "✅ " + estado;
           } else if (estado.includes("FUERA DE OPERACION") || 
                      estado.includes("INOPERATIVO") || 
                      estado.includes("PREVENTIVO") || 
@@ -275,13 +275,11 @@
                      estado.includes("MANTENCIÓN")) {
             estadoClass = "status-inoperativo";
             icono = "❌ " + estado;
-          } else if (estado.includes("PREVENTIVO")) {
-            estadoClass = "status-preventivo";
-            icono = "🛠️ " + estado;
           } else {
             icono = estado;
           }
           
+          // Mostrar el estado completo en el cuadro inferior
           statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
           
