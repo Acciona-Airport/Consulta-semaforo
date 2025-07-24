@@ -21,7 +21,7 @@
       padding: 25px;
       border-radius: 18px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 900px;
+      max-width: 480px;
       width: 100%;
       border: 1px solid #ccc;
     }
@@ -163,79 +163,6 @@
     .btn:hover {
       background-color: #b71c1c;
     }
-    
-    /* Estilos para la lista de equipos */
-    .lista-equipos {
-      width: 100%;
-      margin-top: 30px;
-    }
-    .equipo-item {
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .equipo-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 8px;
-    }
-    .equipo-id {
-      font-weight: bold;
-      color: #c62828;
-      font-size: 16px;
-    }
-    .equipo-status {
-      font-weight: bold;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-    .status-operativo-lista {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .status-inoperativo-lista {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    .status-preventivo-lista {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-    .status-fuera-lista {
-      background-color: #e2e3e5;
-      color: #383d41;
-    }
-    .equipo-details {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    .equipo-detail {
-      margin-bottom: 5px;
-    }
-    .detail-label {
-      font-weight: bold;
-      color: #555;
-      font-size: 13px;
-    }
-    .detail-value {
-      font-size: 14px;
-    }
-    .lista-container {
-      max-height: 600px;
-      overflow-y: auto;
-      margin-top: 20px;
-      padding-right: 10px;
-    }
-    .btn-actualizar {
-      background-color: #2e7d32;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -270,17 +197,6 @@
       <label>Observaciones:</label>
       <div class="input-estilo" id="observaciones-equipo"></div>
     </div>
-
-    <!-- Lista de equipos -->
-    <div class="section">
-      <h2>Listado Completo de Equipos (Columnas A-G)</h2>
-      <button class="btn btn-actualizar" onclick="cargarListaEquipos()">Actualizar Listado</button>
-      <div class="lista-container">
-        <div class="lista-equipos" id="lista-equipos">
-          <!-- Los datos se cargarán dinámicamente -->
-        </div>
-      </div>
-    </div>
   </div>
 
   <div id="overlay">
@@ -289,7 +205,6 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    const RANGO_DATOS = "A1:G500"; // Columnas A a G, filas 1 a 500
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -347,11 +262,14 @@
           statusDetalle.innerText = "El equipo no existe en la base de datos";
           statusDetalle.className = "status-box status-otros";
         } else {
+          // Mostrar información del equipo
           familiaBox.innerText = data.FAMILIA || "Sin información";
           
+          // Obtener estado
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
+          // Determinar clase según el estado (comparación exacta)
           let estadoClass = "status-otros";
           let icono = "";
           
@@ -373,8 +291,11 @@
             icono = estado;
           }
           
+          // Mostrar el estado completo en el cuadro inferior
           statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
+          
+          // Mostrar observaciones
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
@@ -386,71 +307,6 @@
         mostrarOverlay(false);
       }
     }
-
-    async function cargarListaEquipos() {
-      mostrarOverlay(true);
-      try {
-        const response = await fetch(URL_GET + "?tipo=lista&rango=" + encodeURIComponent(RANGO_DATOS));
-        const data = await response.json();
-        
-        const listaEquipos = document.getElementById("lista-equipos");
-        listaEquipos.innerHTML = "";
-        
-        data.forEach(equipo => {
-          const item = document.createElement("div");
-          item.className = "equipo-item";
-          
-          // Determinar clase de estado
-          let estadoClass = "";
-          const estado = (equipo["STATUS ✎"] || "").toUpperCase();
-          
-          if (estado === "OPERATIVO") {
-            estadoClass = "status-operativo-lista";
-          } else if (estado === "INOPERATIVO") {
-            estadoClass = "status-inoperativo-lista";
-          } else if (estado === "PREVENTIVO") {
-            estadoClass = "status-preventivo-lista";
-          } else if (estado === "FUERA DE OPERACION" || estado === "REVISIÓN") {
-            estadoClass = "status-fuera-lista";
-          }
-          
-          item.innerHTML = `
-            <div class="equipo-header">
-              <span class="equipo-id">ID: ${equipo.ID || "N/A"}</span>
-              <span class="equipo-status ${estadoClass}">${estado || "DESCONOCIDO"}</span>
-            </div>
-            <div class="equipo-details">
-              <div class="equipo-detail">
-                <div class="detail-label">Familia:</div>
-                <div class="detail-value">${equipo.FAMILIA || "Sin información"}</div>
-              </div>
-              <div class="equipo-detail">
-                <div class="detail-label">Marca:</div>
-                <div class="detail-value">${equipo["MARCA EQUIPO"] || "N/A"}</div>
-              </div>
-              <div class="equipo-detail">
-                <div class="detail-label">Modelo:</div>
-                <div class="detail-value">${equipo["MODELO EQUIPO"] || "N/A"}</div>
-              </div>
-              <div class="equipo-detail">
-                <div class="detail-label">Observaciones:</div>
-                <div class="detail-value">${equipo.OBSERVACIONES || "Sin observaciones"}</div>
-              </div>
-            </div>
-          `;
-          
-          listaEquipos.appendChild(item);
-        });
-      } catch (error) {
-        console.error("Error al cargar lista:", error);
-        alert("Error al cargar los datos de los equipos");
-      } finally {
-        mostrarOverlay(false);
-      }
-    }
-
-    // Cargar lista al iniciar
-    document.addEventListener("DOMContentLoaded", cargarListaEquipos);
 
     // Permitir consultar con Enter
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
