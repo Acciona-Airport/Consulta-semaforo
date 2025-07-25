@@ -1,315 +1,122 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Consulta de Estado de Equipos - Semáforo AMS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta Estado Equipos - Acciona</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f4f4;
-      color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 15px;
-      margin: 0;
-    }
-    .container {
-      background-color: #ffffff;
-      padding: 25px;
-      border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 480px;
-      width: 100%;
-      border: 1px solid #ccc;
-    }
-    .logo-wrapper {
+      padding: 20px;
       display: flex;
       justify-content: center;
+    }
+
+    .container {
+      max-width: 700px;
+      width: 100%;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 20px;
       margin-bottom: 20px;
     }
-    .logo-acciona {
-      max-width: 180px;
-      height: auto;
-      margin-bottom: 15px;
-    }
-    .logo-semaforo {
-      max-width: 240px;
-      height: auto;
-      margin: 10px auto 20px;
-      display: block;
-    }
-    h1 {
-      font-size: 20px;
-      color: #111;
-      text-align: center;
-      margin-bottom: 15px;
-      white-space: normal;
+
+    select, button {
       width: 100%;
-      padding: 0 10px;
-      font-weight: 600;
-    }
-    label {
-      display: block;
-      margin-top: 14px;
-      margin-bottom: 6px;
-      font-weight: bold;
-      color: #333;
-      font-size: 14px;
-    }
-    .section { margin-bottom: 20px; }
-    .input-estilo {
-      width: 100%;
-      min-height: 42px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      background-color: #fafafa;
-      color: #000;
-      transition: border-color 0.3s, box-shadow 0.3s;
-      resize: none;
-    }
-    .input-estilo:focus {
-      border-color: #c62828;
-      box-shadow: 0 0 5px rgba(198, 40, 40, 0.4);
-      outline: none;
-    }
-    .datetime-box {
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
       padding: 10px;
-      text-align: center;
-      border-radius: 8px;
-      margin-bottom: 18px;
-      font-weight: bold;
-      font-size: 14px;
-      color: #222;
+      margin-bottom: 15px;
+      font-size: 16px;
     }
-    .status-box {
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-    }
-    .status-operativo {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .status-inoperativo {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .status-preventivo {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
-    .status-otros {
-      background-color: #e2e3e5;
-      color: #383d41;
-      border: 1px solid #d6d8db;
-    }
-    .spinner {
-      display: inline-block;
-      width: 15px;
-      height: 15px;
-      border: 2px solid rgba(198, 40, 40, 0.3);
-      border-top-color: #c62828;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      display: none;
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-    #overlay .loader {
-      width: 60px;
-      height: 60px;
-      border: 6px solid rgba(198, 40, 40, 0.2);
-      border-top: 6px solid #c62828;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    .btn {
-      background-color: #c62828;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 10px;
+
+    table {
       width: 100%;
-      transition: background-color 0.3s;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
-    .btn:hover {
-      background-color: #b71c1c;
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #e8e8e8;
+    }
+
+    .loading {
+      text-align: center;
+      font-weight: bold;
+      color: #777;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo-wrapper">
-      <img src="https://raw.githubusercontent.com/Acciona-Airport/Consulta-semaforo/refs/heads/main/Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona">
-    </div>
-    <h1>Consulta de Estado de Equipos - Semáforo AMS</h1>
-    <img src="https://raw.githubusercontent.com/Acciona-Airport/Consulta-semaforo/refs/heads/main/semaforo.png" alt="semaforo.png" class="logo-semaforo">
+    <h1>Consulta de Estado de Equipos</h1>
     
-    <div class="datetime-box" id="datetime"></div>
-
-    <div class="section">
-      <label for="numero-equipo">Número de equipo:</label>
-      <input type="text" class="input-estilo" id="numero-equipo" placeholder="Ej: 51115" />
-      <button class="btn" onclick="consultarEstado()">Consultar Estado</button>
-    </div>
-
-    <div class="section">
-      <label>Familia del equipo:</label>
-      <div class="input-estilo" id="familia-equipo"></div>
-    </div>
-
-    <div class="section">
-      <label>Estado actual:</label>
-      <div class="input-estilo" id="status-equipo"></div>
-      <div id="status-detalle" class="status-box"></div>
-    </div>
-
-    <div class="section">
-      <label>Observaciones:</label>
-      <div class="input-estilo" id="observaciones-equipo"></div>
-    </div>
-  </div>
-
-  <div id="overlay">
-    <div class="loader"></div>
+    <select id="selector">
+      <option value="">Seleccione Familia o ingrese texto</option>
+      <option value="ASU">ASU</option>
+      <option value="PET">PET</option>
+      <option value="LDN">LDN</option>
+      <option value="VTA">VTA</option>
+      <!-- Puedes agregar más opciones si deseas -->
+    </select>
+    
+    <button onclick="buscarDatos()">Buscar</button>
+    
+    <div id="resultado"></div>
   </div>
 
   <script>
-    const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    const URL_GET = 'https://script.google.com/macros/s/AKfycbw7KeNf_nNwkwonok5c70IjEa6AvIgGyie60x_IeDWxPzI-QGvaQodJYxJtstS5RwswIg/exec';
 
-    function actualizarFechaHora() {
-      const now = new Date();
-      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      const diaSemana = dias[now.getDay()];
-      const dia = now.getDate();
-      const mes = meses[now.getMonth()];
-      const anio = now.getFullYear();
-      let hora = now.getHours();
-      const minutos = String(now.getMinutes()).padStart(2, '0');
-      const segundos = String(now.getSeconds()).padStart(2, '0');
-      const ampm = hora >= 12 ? 'P.M' : 'A.M';
-      hora = hora % 12 || 12;
-      const fechaFormateada = `${diaSemana}, ${dia} de ${mes} de ${anio}, ${hora}:${minutos}:${segundos} ${ampm}`;
-      document.getElementById("datetime").innerText = fechaFormateada;
-    }
-    setInterval(actualizarFechaHora, 1000);
-    actualizarFechaHora();
+    function buscarDatos() {
+      const valor = document.getElementById("selector").value.trim().toUpperCase();
+      const contenedor = document.getElementById("resultado");
+      
+      contenedor.innerHTML = '<p class="loading">Buscando datos...</p>';
 
-    function mostrarOverlay(mostrar) {
-      document.getElementById("overlay").style.display = mostrar ? "flex" : "none";
-    }
+      fetch(URL_GET)
+        .then(res => res.json())
+        .then(data => {
+          const filtrados = data.filter(row => row[0].toUpperCase() === valor);
 
-    function limpiarResultados() {
-      document.getElementById("familia-equipo").innerText = "";
-      document.getElementById("status-equipo").innerText = "";
-      document.getElementById("status-detalle").innerText = "";
-      document.getElementById("status-detalle").className = "status-box";
-      document.getElementById("observaciones-equipo").innerText = "";
-    }
-
-    async function consultarEstado() {
-      const id = document.getElementById("numero-equipo").value.trim();
-      const familiaBox = document.getElementById("familia-equipo");
-      const statusBox = document.getElementById("status-equipo");
-      const statusDetalle = document.getElementById("status-detalle");
-      const obsBox = document.getElementById("observaciones-equipo");
-
-      if (!id) {
-        alert("Por favor ingrese un número de equipo");
-        return;
-      }
-
-      limpiarResultados();
-      mostrarOverlay(true);
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 segundos
-
-      try {
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${URL_GET}?tipo=equipo&id=${encodeURIComponent(id)}&t=${timestamp}`, {
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        const data = await response.json();
-
-        if (data.error) {
-          familiaBox.innerText = "Equipo no encontrado";
-          statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
-          statusDetalle.className = "status-box status-otros";
-        } else {
-          familiaBox.innerText = data.FAMILIA || "Sin información";
-
-          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
-
-          let estadoClass = "status-otros";
-          let icono = estado;
-
-          if (estado === "OPERATIVO") {
-            estadoClass = "status-operativo";
-            icono = "✅ " + estado;
-          } else if (["INOPERATIVO", "FUERA DE OPERACION", "PREVENTIVO", "REVISIÓN", "LAVADO", "MANTENCIÓN"].includes(estado)) {
-            estadoClass = "status-inoperativo";
-            icono = "❌ " + estado;
-          } else if (estado === "PREVENTIVO") {
-            estadoClass = "status-preventivo";
-            icono = "🛠️ " + estado;
+          if (filtrados.length === 0) {
+            contenedor.innerHTML = '<p class="loading">No se encontraron resultados para: ' + valor + '</p>';
+            return;
           }
 
-          statusDetalle.innerHTML = icono;
-          statusDetalle.className = "status-box " + estadoClass;
+          let tabla = '<table><thead><tr>';
+          tabla += '<th>Familia</th><th>ID</th><th>Marca</th><th>Modelo</th><th>Status</th><th>Observaciones</th>';
+          tabla += '</tr></thead><tbody>';
 
-          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
-        }
-      } catch (error) {
-        console.error("Error al consultar:", error);
-        statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
-        statusDetalle.className = "status-box status-inoperativo";
-      } finally {
-        mostrarOverlay(false);
-      }
+          filtrados.forEach(fila => {
+            tabla += '<tr>';
+            for (let i = 0; i < 6; i++) {
+              tabla += `<td>${fila[i] || ''}</td>`;
+            }
+            tabla += '</tr>';
+          });
+
+          tabla += '</tbody></table>';
+          contenedor.innerHTML = tabla;
+        })
+        .catch(err => {
+          contenedor.innerHTML = '<p class="loading">❌ Error al obtener datos</p>';
+          console.error(err);
+        });
     }
-
-    document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        consultarEstado();
-      }
-    });
   </script>
 </body>
 </html>
