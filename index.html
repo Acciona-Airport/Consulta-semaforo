@@ -205,6 +205,7 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    const TIMEOUT = 5000; // 5 segundos máximo de espera
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -252,14 +253,37 @@
       limpiarResultados();
       mostrarOverlay(true);
 
+      // Mostrar contador de tiempo real
+      let seconds = 0;
+      const timerInterval = setInterval(() => {
+        seconds++;
+        document.getElementById("status-detalle").innerText = `Consultando... ${seconds}s`;
+        document.getElementById("status-detalle").className = "status-box status-otros";
+      }, 1000);
+
       try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
+        // Configurar timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
+        
+        // Forzar consulta fresca sin caché
+        const startTime = Date.now();
+        const response = await fetch(`${URL_GET}?tipo=equipo&id=${encodeURIComponent(id)}&timestamp=${startTime}`, {
+          signal: controller.signal,
+          cache: 'no-store'
+        });
+        
+        clearTimeout(timeoutId);
+        clearInterval(timerInterval);
+        
         const data = await response.json();
+        const endTime = Date.now();
+        const tiempoRespuesta = (endTime - startTime) / 1000;
 
         if (data.error) {
           familiaBox.innerText = "Equipo no encontrado";
           statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
+          statusDetalle.innerText = `El equipo no existe en la base de datos (${tiempoRespuesta.toFixed(2)}s)`;
           statusDetalle.className = "status-box status-otros";
         } else {
           // Mostrar información del equipo
@@ -267,9 +291,9 @@
           
           // Obtener estado
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
+          statusBox.innerText = `Estado: ${estado} (${tiempoRespuesta.toFixed(2)}s)`;
           
-          // Determinar clase según el estado (comparación exacta)
+          // Determinar clase según el estado
           let estadoClass = "status-otros";
           let icono = "";
           
@@ -292,16 +316,21 @@
           }
           
           // Mostrar el estado completo en el cuadro inferior
-          statusDetalle.innerHTML = icono;
+          statusDetalle.innerHTML = `${icono} (${tiempoRespuesta.toFixed(2)}s)`;
           statusDetalle.className = "status-box " + estadoClass;
           
           // Mostrar observaciones
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
+        clearInterval(timerInterval);
         console.error("Error al consultar:", error);
         statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        if (error.name === 'AbortError') {
+          statusDetalle.innerText = "La consulta tardó demasiado. Intente nuevamente.";
+        } else {
+          statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        }
         statusDetalle.className = "status-box status-inoperativo";
       } finally {
         mostrarOverlay(false);
