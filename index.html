@@ -219,6 +219,17 @@
     .auth-error {
       color: #721c24;
     }
+    .password-container {
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -229,7 +240,10 @@
     <h1>Acceso al sistema de consulta. 🔐</h1>
     <div class="section">
       <label for="password-input">Ingrese el código de acceso:</label>
-      <input type="password" class="input-estilo" id="password-input" placeholder="Código de acceso" />
+      <div class="password-container">
+        <input type="password" class="input-estilo" id="password-input" placeholder="Código de acceso" />
+        <span class="toggle-password" onclick="togglePassword()">👁️‍🗨️</span>
+      </div>
       <div id="error-auth" class="error-auth">Código incorrecto. Intente nuevamente.</div>
       
       <div id="auth-loader" class="auth-loader"></div>
@@ -287,6 +301,15 @@
     ];
     const INTERVALO_MENSAJES = 4000; // 
     const CODIGO_ACCESO = "Jefesdeturno2025"; // 
+
+    function togglePassword() {
+      const passwordInput = document.getElementById('password-input');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+      } else {
+        passwordInput.type = 'password';
+      }
+    }
 
     // 
     document.addEventListener('DOMContentLoaded', function() {
