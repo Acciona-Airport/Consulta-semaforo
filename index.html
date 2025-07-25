@@ -24,7 +24,7 @@
       max-width: 480px;
       width: 100%;
       border: 1px solid #ccc;
-      display: none; /* Ocultar inicialmente hasta autenticación */
+      display: none; 
     }
     .auth-container {
       background-color: #ffffff;
@@ -270,14 +270,14 @@
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
     const MENSAJES_CARGA = [
       "Estableciendo conexión con el servidor...",
-      "Consultando datos con la base de datos...",
       "Realizando cruce de información...",
+      "Consultando datos con la base de datos...",
       "Procesando resultados..."
     ];
-    const INTERVALO_MENSAJES = 4000; // 4 segundos
-    const CODIGO_ACCESO = "8965"; // Código de acceso requerido
+    const INTERVALO_MENSAJES = 4000; // 
+    const CODIGO_ACCESO = "8965"; // 
 
-    // Verificar si ya está autenticado (solo para la misma sesión)
+    // 
     document.addEventListener('DOMContentLoaded', function() {
       if (!sessionStorage.getItem('autenticado')) {
         document.getElementById('auth-container').style.display = 'block';
@@ -295,32 +295,32 @@
       const authMessage = document.getElementById('auth-message');
       const authButton = document.getElementById('auth-button');
       
-      // Ocultar elementos previos
+      // 
       errorAuth.style.display = 'none';
       authMessage.style.display = 'none';
       
-      // Mostrar loader
+      // 
       authLoader.style.display = 'block';
       authButton.style.display = 'none';
       
-      // Simular verificación con delay
+      // 
       setTimeout(function() {
         authLoader.style.display = 'none';
         
         if (passwordInput.value === CODIGO_ACCESO) {
-          // Acceso correcto
+          // 
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
           
-          // Guardar autenticación y cambiar pantalla después de 1.5 segundos
+          // 
           setTimeout(function() {
             sessionStorage.setItem('autenticado', 'true');
             document.getElementById('auth-container').style.display = 'none';
             document.getElementById('main-container').style.display = 'block';
           }, 1500);
         } else {
-          // Acceso incorrecto
+          // 
           authMessage.textContent = "❌ Acceso denegado.";
           authMessage.className = "auth-message auth-error";
           authMessage.style.display = 'block';
@@ -329,7 +329,7 @@
           passwordInput.focus();
           authButton.style.display = 'block';
         }
-      }, 1500); // Simular tiempo de verificación
+      }, 1500); // 
     }
 
     function actualizarFechaHora() {
@@ -378,7 +378,7 @@
       limpiarResultados();
       mostrarOverlay(true);
 
-      // Iniciar rotación de mensajes
+      // 
       let mensajeIndex = 0;
       const statusMensaje = document.getElementById("status-mensaje");
       statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
@@ -400,14 +400,14 @@
           statusDetalle.innerText = "El equipo no existe en la base de datos";
           statusDetalle.className = "status-box status-otros";
         } else {
-          // Mostrar información del equipo
+          // 
           familiaBox.innerText = data.FAMILIA || "Sin información";
           
-          // Obtener estado
+          // 
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
-          // Determinar clase según el estado (comparación exacta)
+          // 
           let estadoClass = "status-otros";
           let icono = "";
           
@@ -429,11 +429,11 @@
             icono = estado;
           }
           
-          // Mostrar el estado completo en el cuadro inferior
+          // 
           statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
           
-          // Mostrar observaciones
+          // 
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
@@ -447,14 +447,14 @@
       }
     }
 
-    // Permitir consultar con Enter
+    // 
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         consultarEstado();
       }
     });
 
-    // Permitir ingresar contraseña con Enter
+    // 
     document.getElementById("password-input").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         verificarAcceso();
