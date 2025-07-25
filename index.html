@@ -205,7 +205,6 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    let controller;
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -240,27 +239,22 @@
 
     async function consultarEstado() {
       const id = document.getElementById("numero-equipo").value.trim();
+      const familiaBox = document.getElementById("familia-equipo");
+      const statusBox = document.getElementById("status-equipo");
+      const statusDetalle = document.getElementById("status-detalle");
+      const obsBox = document.getElementById("observaciones-equipo");
+
       if (!id) {
-        limpiarResultados();
+        alert("Por favor ingrese un número de equipo");
         return;
       }
 
       limpiarResultados();
       mostrarOverlay(true);
 
-      if (controller) controller.abort();
-      controller = new AbortController();
-
       try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id), {
-          signal: controller.signal
-        });
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
         const data = await response.json();
-
-        const familiaBox = document.getElementById("familia-equipo");
-        const statusBox = document.getElementById("status-equipo");
-        const statusDetalle = document.getElementById("status-detalle");
-        const obsBox = document.getElementById("observaciones-equipo");
 
         if (data.error) {
           familiaBox.innerText = "Equipo no encontrado";
@@ -268,49 +262,57 @@
           statusDetalle.innerText = "El equipo no existe en la base de datos";
           statusDetalle.className = "status-box status-otros";
         } else {
+          // Mostrar información del equipo
           familiaBox.innerText = data.FAMILIA || "Sin información";
+          
+          // Obtener estado
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
-
+          
+          // Determinar clase según el estado (comparación exacta)
           let estadoClass = "status-otros";
-          let icono = estado;
-
+          let icono = "";
+          
           if (estado === "OPERATIVO") {
             estadoClass = "status-operativo";
             icono = "✅ " + estado;
-          } else if (["INOPERATIVO", "FUERA DE OPERACION", "REVISIÓN", "LAVADO", "MANTENCIÓN"].includes(estado)) {
+          } else if (estado === "INOPERATIVO" || 
+                     estado === "FUERA DE OPERACION" || 
+                     estado === "PREVENTIVO" || 
+                     estado === "REVISIÓN" || 
+                     estado === "LAVADO" ||
+                     estado === "MANTENCIÓN") {
             estadoClass = "status-inoperativo";
             icono = "❌ " + estado;
           } else if (estado === "PREVENTIVO") {
             estadoClass = "status-preventivo";
             icono = "🛠️ " + estado;
+          } else {
+            icono = estado;
           }
-
-          statusDetalle.innerText = icono;
+          
+          // Mostrar el estado completo en el cuadro inferior
+          statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
+          
+          // Mostrar observaciones
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          document.getElementById("status-equipo").innerText = "Error";
-          document.getElementById("status-detalle").innerText = "Ocurrió un error al consultar el estado";
-          document.getElementById("status-detalle").className = "status-box status-inoperativo";
-        }
+        console.error("Error al consultar:", error);
+        statusBox.innerText = "Error";
+        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        statusDetalle.className = "status-box status-inoperativo";
       } finally {
         mostrarOverlay(false);
       }
     }
 
-    // Consultar con Enter
+    // Permitir consultar con Enter
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") consultarEstado();
-    });
-
-    // Consultar automáticamente al escribir con debounce
-    let debounce;
-    document.getElementById("numero-equipo").addEventListener("input", function () {
-      clearTimeout(debounce);
-      debounce = setTimeout(consultarEstado, 300);
+      if (e.key === "Enter") {
+        consultarEstado();
+      }
     });
   </script>
 </body>
