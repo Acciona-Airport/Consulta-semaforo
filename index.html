@@ -163,6 +163,12 @@
     .btn:hover {
       background-color: #b71c1c;
     }
+    .status-mensaje {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #333;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -201,10 +207,18 @@
 
   <div id="overlay">
     <div class="loader"></div>
+    <div id="status-mensaje" class="status-mensaje">Estableciendo conexión con el servidor...</div>
   </div>
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
+    const MENSAJES_CARGA = [
+      "Estableciendo conexión con el servidor...",
+      "Consultando datos con la base de datos...",
+      "Realizando cruce de información...",
+      "Procesando resultados..."
+    ];
+    const INTERVALO_MENSAJES = 4000; // 4 segundos
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -252,9 +266,21 @@
       limpiarResultados();
       mostrarOverlay(true);
 
+      // Iniciar rotación de mensajes
+      let mensajeIndex = 0;
+      const statusMensaje = document.getElementById("status-mensaje");
+      statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
+      
+      const mensajeInterval = setInterval(() => {
+        mensajeIndex = (mensajeIndex + 1) % MENSAJES_CARGA.length;
+        statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
+      }, INTERVALO_MENSAJES);
+
       try {
         const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
         const data = await response.json();
+
+        clearInterval(mensajeInterval);
 
         if (data.error) {
           familiaBox.innerText = "Equipo no encontrado";
@@ -304,6 +330,7 @@
         statusDetalle.innerText = "Ocurrió un error al consultar el estado";
         statusDetalle.className = "status-box status-inoperativo";
       } finally {
+        clearInterval(mensajeInterval);
         mostrarOverlay(false);
       }
     }
