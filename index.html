@@ -205,14 +205,6 @@
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    const TIMEOUT = 10000; // 10 segundos máximo de espera
-
-    // Optimización: Preconexión
-    const link = document.createElement('link');
-    link.rel = 'preconnect';
-    link.href = 'https://script.google.com';
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -260,95 +252,67 @@
       limpiarResultados();
       mostrarOverlay(true);
 
-      // Optimización: AbortController para cancelar solicitudes lentas
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT);
-
       try {
-        // Optimización: Usar Promise.race para competencia entre fetch y timeout
-        const fetchPromise = fetch(`${URL_GET}?tipo=equipo&id=${encodeURIComponent(id)}&timestamp=${Date.now()}`, {
-          signal: controller.signal,
-          cache: 'no-store',
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest' // Mejora compatibilidad con algunos servidores
-          }
-        });
-
-        // Optimización: Timeout real usando Promise.race
-        const response = await Promise.race([
-          fetchPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), TIMEOUT))
-        ]);
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
         const data = await response.json();
 
-        // Procesamiento optimizado de datos
-        procesarResultado(data, familiaBox, statusBox, statusDetalle, obsBox);
-
+        if (data.error) {
+          familiaBox.innerText = "Equipo no encontrado";
+          statusBox.innerText = "N/A";
+          statusDetalle.innerText = "El equipo no existe en la base de datos";
+          statusDetalle.className = "status-box status-otros";
+        } else {
+          // Mostrar información del equipo
+          familiaBox.innerText = data.FAMILIA || "Sin información";
+          
+          // Obtener estado
+          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
+          statusBox.innerText = "Estado: " + estado;
+          
+          // Determinar clase según el estado (comparación exacta)
+          let estadoClass = "status-otros";
+          let icono = "";
+          
+          if (estado === "OPERATIVO") {
+            estadoClass = "status-operativo";
+            icono = "✅ " + estado;
+          } else if (estado === "INOPERATIVO" || 
+                     estado === "FUERA DE OPERACION" || 
+                     estado === "PREVENTIVO" || 
+                     estado === "REVISIÓN" || 
+                     estado === "LAVADO" ||
+                     estado === "MANTENCIÓN") {
+            estadoClass = "status-inoperativo";
+            icono = "❌ " + estado;
+          } else if (estado === "PREVENTIVO") {
+            estadoClass = "status-preventivo";
+            icono = "🛠️ " + estado;
+          } else {
+            icono = estado;
+          }
+          
+          // Mostrar el estado completo en el cuadro inferior
+          statusDetalle.innerHTML = icono;
+          statusDetalle.className = "status-box " + estadoClass;
+          
+          // Mostrar observaciones
+          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
+        }
       } catch (error) {
         console.error("Error al consultar:", error);
         statusBox.innerText = "Error";
-        
-        if (error.name === 'AbortError' || error.message === 'Timeout') {
-          statusDetalle.innerText = "La consulta tardó demasiado. revise su conexión a internet.";
-        } else {
-          statusDetalle.innerText = "Ocurrió un error al consultar el estado";
-        }
+        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
         statusDetalle.className = "status-box status-inoperativo";
       } finally {
         mostrarOverlay(false);
       }
     }
 
-    // Función optimizada para procesar resultados
-    function procesarResultado(data, familiaBox, statusBox, statusDetalle, obsBox) {
-      if (data.error) {
-        familiaBox.innerText = "Equipo no encontrado";
-        statusBox.innerText = "N/A";
-        statusDetalle.innerText = "El equipo no existe en la base de datos";
-        statusDetalle.className = "status-box status-otros";
-        return;
+    // Permitir consultar con Enter
+    document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        consultarEstado();
       }
-
-      // Procesamiento más eficiente de los datos
-      const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-      const familia = data.FAMILIA || "Sin información";
-      const observaciones = data.OBSERVACIONES || "Sin observaciones";
-
-      // Mapeo optimizado de estados
-      const estadoMap = {
-        'OPERATIVO': { class: 'status-operativo', icon: '✅' },
-        'INOPERATIVO': { class: 'status-inoperativo', icon: '❌' },
-        'FUERA DE OPERACION': { class: 'status-inoperativo', icon: '❌' },
-        'PREVENTIVO': { class: 'status-preventivo', icon: '🛠️' },
-        'REVISIÓN': { class: 'status-preventivo', icon: '🛠️' },
-        'LAVADO': { class: 'status-preventivo', icon: '🛠️' },
-        'MANTENCIÓN': { class: 'status-preventivo', icon: '🛠️' }
-      };
-
-      const estadoConfig = estadoMap[estado] || { class: 'status-otros', icon: '' };
-
-      // Actualización eficiente del DOM
-      familiaBox.textContent = familia;
-      statusBox.textContent = `Estado: ${estado}`;
-      statusDetalle.innerHTML = `${estadoConfig.icon} ${estado}`;
-      statusDetalle.className = `status-box ${estadoConfig.class}`;
-      obsBox.textContent = observaciones;
-    }
-
-    // Permitir consultar con Enter (optimizado con delegación de eventos)
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") {
-          consultarEstado();
-        }
-      });
     });
   </script>
 </body>
