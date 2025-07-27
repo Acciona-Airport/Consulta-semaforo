@@ -320,7 +320,16 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const CODIGO_ACCESO = "Jefesdeturno2025";
+
+    // Función para obtener la contraseña de forma ofuscada
+    function obtenerContrasena() {
+      const partes = [
+        String.fromCharCode(74, 101, 102, 101, 115), // "Jefes"
+        String.fromCharCode(100, 101, 116, 117, 114, 110, 111), // "deturno"
+        String.fromCharCode(50, 48, 50, 53) // "2025"
+      ];
+      return partes.join('');
+    }
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -362,7 +371,7 @@
       setTimeout(function() {
         authLoader.style.display = 'none';
         
-        if (passwordInput.value === CODIGO_ACCESO) {
+        if (passwordInput.value === obtenerContrasena()) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
