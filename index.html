@@ -320,7 +320,7 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const CODIGO_ACCESO_HASH = "30aaaa8ecf3a5e4ef65cbe8247895fdd4742a1ca594a1f1d975aa2011e95f88e";
+    const HASH_VALIDO = "7a1e03b6a1e7b6d8c2b5e8e7f3a9d0c1b2a3c4d5e6f7a8b9c0d1e2f3a4b5c6d7";
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -331,22 +331,10 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      if (!sessionStorage.getItem('autenticado')) {
-        document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('main-container').style.display = 'none';
-      } else {
-        document.getElementById('auth-container').style.display = 'none';
-        document.getElementById('main-container').style.display = 'block';
-        setTimeout(() => {
-          document.getElementById('main-container').classList.add('active');
-        }, 50);
-      }
-    });
-
-    async function calcularSHA256(texto) {
+    async function calcularHashSeguro(texto) {
+      const textoConSalt = "AMS_" + texto + "_2025";
       const encoder = new TextEncoder();
-      const data = encoder.encode(texto);
+      const data = encoder.encode(textoConSalt);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -367,9 +355,9 @@
       authButton.style.display = 'none';
       
       try {
-        const hashIngresado = await calcularSHA256(passwordInput.value);
+        const hashIngresado = await calcularHashSeguro(passwordInput.value);
         
-        if (hashIngresado === CODIGO_ACCESO_HASH) {
+        if (hashIngresado === HASH_VALIDO) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
@@ -399,6 +387,19 @@
         authButton.style.display = 'block';
       }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!sessionStorage.getItem('autenticado')) {
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('main-container').style.display = 'none';
+      } else {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('main-container').classList.add('active');
+        }, 50);
+      }
+    });
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -484,7 +485,7 @@
             icono = "🛠️ " + estado;
           } else if (estado === "FUERA DE OPERACION") {
             estadoClass = "status-fuera-operacion";
-            icono = "❌ " + estado;
+            icono = "◼️ " + estado;
           } else if (estado === "LAVADO") {
             estadoClass = "status-lavado";
             icono = "🚿 " + estado;
@@ -501,7 +502,6 @@
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
-        console.error("Error al consultar:", error);
         statusBox.innerText = "Error";
         statusDetalle.innerText = "Ocurrió un error al consultar el estado";
         statusDetalle.className = "status-box status-inoperativo";
