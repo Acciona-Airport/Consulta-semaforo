@@ -129,9 +129,24 @@
       border: 1px solid #f5c6cb;
     }
     .status-preventivo {
+      background-color: #cce5ff;
+      color: #004085;
+      border: 1px solid #b8daff;
+    }
+    .status-fuera-operacion {
+      background-color: #6c757d;
+      color: #ffffff;
+      border: 1px solid #5a6268;
+    }
+    .status-lavado {
       background-color: #fff3cd;
       color: #856404;
       border: 1px solid #ffeeba;
+    }
+    .status-revision {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
     }
     .status-otros {
       background-color: #e2e3e5;
@@ -299,8 +314,8 @@
       "Consultando la base de datos...",
       "Procesando resultados..."
     ];
-    const INTERVALO_MENSAJES = 4000; // 
-    const CODIGO_ACCESO = "Jefesdeturno2025"; // 
+    const INTERVALO_MENSAJES = 4000;
+    const CODIGO_ACCESO = "Jefesdeturno2025";
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -311,7 +326,6 @@
       }
     }
 
-    // 
     document.addEventListener('DOMContentLoaded', function() {
       if (!sessionStorage.getItem('autenticado')) {
         document.getElementById('auth-container').style.display = 'block';
@@ -332,25 +346,20 @@
       const authContainer = document.getElementById('auth-container');
       const mainContainer = document.getElementById('main-container');
       
-      // 
       errorAuth.style.display = 'none';
       authMessage.style.display = 'none';
       
-      // 
       authLoader.style.display = 'block';
       authButton.style.display = 'none';
       
-      // 
       setTimeout(function() {
         authLoader.style.display = 'none';
         
         if (passwordInput.value === CODIGO_ACCESO) {
-          // 
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
           
-          // 
           setTimeout(function() {
             sessionStorage.setItem('autenticado', 'true');
             authContainer.classList.add('hide');
@@ -362,7 +371,6 @@
             }, 500);
           }, 1500);
         } else {
-          // 
           authMessage.textContent = "❌ Acceso denegado.";
           authMessage.className = "auth-message auth-error";
           authMessage.style.display = 'block';
@@ -371,7 +379,7 @@
           passwordInput.focus();
           authButton.style.display = 'block';
         }
-      }, 1500); // 
+      }, 1500);
     }
 
     function actualizarFechaHora() {
@@ -420,7 +428,6 @@
       limpiarResultados();
       mostrarOverlay(true);
 
-      // 
       let mensajeIndex = 0;
       const statusMensaje = document.getElementById("status-mensaje");
       statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
@@ -442,40 +449,39 @@
           statusDetalle.innerText = "El equipo no existe en la base de datos";
           statusDetalle.className = "status-box status-otros";
         } else {
-          // 
           familiaBox.innerText = data.FAMILIA || "Sin información";
           
-          // 
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
-          // 
           let estadoClass = "status-otros";
           let icono = "";
           
           if (estado === "OPERATIVO") {
             estadoClass = "status-operativo";
             icono = "✅ " + estado;
-          } else if (estado === "INOPERATIVO" || 
-                     estado === "FUERA DE OPERACION" || 
-                     estado === "PREVENTIVO" || 
-                     estado === "REVISIÓN" || 
-                     estado === "LAVADO" ||
-                     estado === "MANTENCIÓN") {
+          } else if (estado === "INOPERATIVO") {
             estadoClass = "status-inoperativo";
             icono = "❌ " + estado;
           } else if (estado === "PREVENTIVO") {
             estadoClass = "status-preventivo";
             icono = "🛠️ " + estado;
+          } else if (estado === "FUERA DE OPERACION") {
+            estadoClass = "status-fuera-operacion";
+            icono = "◼️ " + estado;
+          } else if (estado === "LAVADO") {
+            estadoClass = "status-lavado";
+            icono = "🚿 " + estado;
+          } else if (estado === "REVISIÓN") {
+            estadoClass = "status-revision";
+            icono = "🔍 " + estado;
           } else {
             icono = estado;
           }
           
-          // 
           statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
           
-          // 
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
@@ -489,14 +495,12 @@
       }
     }
 
-    // 
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         consultarEstado();
       }
     });
 
-    // 
     document.getElementById("password-input").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         verificarAcceso();
