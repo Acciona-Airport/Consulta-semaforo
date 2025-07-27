@@ -320,7 +320,14 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const HASH_VALIDO = "7a1e03b6a1e7b6d8c2b5e8e7f3a9d0c1b2a3c4d5e6f7a8b9c0d1e2f3a4b5c6d7";
+    const HASHES_VALIDOS = new Set([
+      "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // Jef
+      "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b", // Age
+      "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c", // Jef2
+      "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d", // Mon
+      "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e", // Ej
+      "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f"  // Acc
+    ]);
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -357,7 +364,7 @@
       try {
         const hashIngresado = await calcularHashSeguro(passwordInput.value);
         
-        if (hashIngresado === HASH_VALIDO) {
+        if (HASHES_VALIDOS.has(hashIngresado)) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
