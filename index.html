@@ -320,7 +320,7 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const HASH_VALIDO = "7a1e03b6a1e7b6d8c2b5e8e7f3a9d0c1b2a3c4d5e6f7a8b9c0d1e2f3a4b5c6d7";
+    const CODIGO_ACCESO = "Jefesdeturno2025";
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -328,63 +328,6 @@
         passwordInput.type = 'text';
       } else {
         passwordInput.type = 'password';
-      }
-    }
-
-    async function calcularHashSeguro(texto) {
-      const textoConSalt = "AMS_" + texto + "_2025";
-      const encoder = new TextEncoder();
-      const data = encoder.encode(textoConSalt);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    async function verificarAcceso() {
-      const passwordInput = document.getElementById('password-input');
-      const errorAuth = document.getElementById('error-auth');
-      const authLoader = document.getElementById('auth-loader');
-      const authMessage = document.getElementById('auth-message');
-      const authButton = document.getElementById('auth-button');
-      const authContainer = document.getElementById('auth-container');
-      const mainContainer = document.getElementById('main-container');
-      
-      errorAuth.style.display = 'none';
-      authMessage.style.display = 'none';
-      authLoader.style.display = 'block';
-      authButton.style.display = 'none';
-      
-      try {
-        const hashIngresado = await calcularHashSeguro(passwordInput.value);
-        
-        if (hashIngresado === HASH_VALIDO) {
-          authMessage.textContent = "✅ Acceso validado.";
-          authMessage.className = "auth-message auth-success";
-          authMessage.style.display = 'block';
-          
-          setTimeout(() => {
-            sessionStorage.setItem('autenticado', 'true');
-            authContainer.classList.add('hide');
-            mainContainer.style.display = 'block';
-            
-            setTimeout(() => {
-              mainContainer.classList.add('active');
-              authContainer.style.display = 'none';
-            }, 500);
-          }, 1500);
-        } else {
-          throw new Error("Acceso denegado");
-        }
-      } catch (error) {
-        authMessage.textContent = "❌ Acceso denegado.";
-        authMessage.className = "auth-message auth-error";
-        authMessage.style.display = 'block';
-        errorAuth.style.display = 'block';
-        passwordInput.value = '';
-        passwordInput.focus();
-      } finally {
-        authLoader.style.display = 'none';
-        authButton.style.display = 'block';
       }
     }
 
@@ -400,6 +343,51 @@
         }, 50);
       }
     });
+
+    function verificarAcceso() {
+      const passwordInput = document.getElementById('password-input');
+      const errorAuth = document.getElementById('error-auth');
+      const authLoader = document.getElementById('auth-loader');
+      const authMessage = document.getElementById('auth-message');
+      const authButton = document.getElementById('auth-button');
+      const authContainer = document.getElementById('auth-container');
+      const mainContainer = document.getElementById('main-container');
+      
+      errorAuth.style.display = 'none';
+      authMessage.style.display = 'none';
+      
+      authLoader.style.display = 'block';
+      authButton.style.display = 'none';
+      
+      setTimeout(function() {
+        authLoader.style.display = 'none';
+        
+        if (passwordInput.value === CODIGO_ACCESO) {
+          authMessage.textContent = "✅ Acceso validado.";
+          authMessage.className = "auth-message auth-success";
+          authMessage.style.display = 'block';
+          
+          setTimeout(function() {
+            sessionStorage.setItem('autenticado', 'true');
+            authContainer.classList.add('hide');
+            mainContainer.style.display = 'block';
+            
+            setTimeout(function() {
+              mainContainer.classList.add('active');
+              authContainer.style.display = 'none';
+            }, 500);
+          }, 1500);
+        } else {
+          authMessage.textContent = "❌ Acceso denegado.";
+          authMessage.className = "auth-message auth-error";
+          authMessage.style.display = 'block';
+          errorAuth.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+          authButton.style.display = 'block';
+        }
+      }, 1500);
+    }
 
     function actualizarFechaHora() {
       const now = new Date();
@@ -502,6 +490,7 @@
           obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
+        console.error("Error al consultar:", error);
         statusBox.innerText = "Error";
         statusDetalle.innerText = "Ocurrió un error al consultar el estado";
         statusDetalle.className = "status-box status-inoperativo";
