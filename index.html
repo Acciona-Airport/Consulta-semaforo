@@ -170,7 +170,6 @@
       margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     #overlay {
       position: fixed;
       top: 0; left: 0;
@@ -321,14 +320,16 @@
     ];
     const INTERVALO_MENSAJES = 4000;
 
-    // Función para obtener la contraseña de forma ofuscada
-    function obtenerContrasena() {
+    function obtenerContrasenas() {
       const partes = [
-        String.fromCharCode(74, 101, 102, 101, 115), // "Jefes"
-        String.fromCharCode(100, 101, 116, 117, 114, 110, 111), // "deturno"
-        String.fromCharCode(50, 48, 50, 53) // "2025"
+        String.fromCharCode(74,101,102,101,115,100,101,116,117,114,110,111,50,48,50,53),
+        String.fromCharCode(65,103,101,110,116,101,114,97,109,112,97,50,48,50,53),
+        String.fromCharCode(74,101,102,101,114,101,97,108,116,105,109,101,50,48,50,53),
+        String.fromCharCode(77,111,110,105,116,111,114,101,115,50,48,50,53),
+        String.fromCharCode(69,106,101,99,117,116,105,118,111,50,48,50,53),
+        String.fromCharCode(65,99,99,99,105,111,110,97,103,114,112,50,48,50,53)
       ];
-      return partes.join('');
+      return partes;
     }
 
     function togglePassword() {
@@ -371,7 +372,18 @@
       setTimeout(function() {
         authLoader.style.display = 'none';
         
-        if (passwordInput.value === obtenerContrasena()) {
+        const contrasenasValidas = obtenerContrasenas();
+        const inputValor = passwordInput.value;
+        let accesoPermitido = false;
+        
+        for (let i = 0; i < contrasenasValidas.length; i++) {
+          if (inputValor === contrasenasValidas[i]) {
+            accesoPermitido = true;
+            break;
+          }
+        }
+        
+        if (accesoPermitido) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
