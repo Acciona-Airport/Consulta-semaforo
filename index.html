@@ -321,15 +321,14 @@
     const INTERVALO_MENSAJES = 4000;
 
     function obtenerContrasenas() {
-      const partes = [
-        String.fromCharCode(74,101,102,101,115,100,101,116,117,114,110,111,50,48,50,53),
-        String.fromCharCode(65,103,101,110,116,101,114,97,109,112,97,50,48,50,53),
-        String.fromCharCode(74,101,102,101,114,101,97,108,116,105,109,101,50,48,50,53),
-        String.fromCharCode(77,111,110,105,116,111,114,101,115,50,48,50,53),
-        String.fromCharCode(69,106,101,99,117,116,105,118,111,50,48,50,53),
-        String.fromCharCode(65,99,99,99,105,111,110,97,103,114,112,50,48,50,53)
+      return [
+        String.fromCharCode(74,101,102,101,115,100,101,116,117,114,110,111,50,48,50,53),  // Jefesdeturno2025
+        String.fromCharCode(65,103,101,110,116,101,114,97,109,112,97,50,48,50,53),        // Agenterampa2025
+        String.fromCharCode(74,101,102,101,114,101,97,108,116,105,109,101,50,48,50,53), // Jeferealtime2025
+        String.fromCharCode(77,111,110,105,116,111,114,101,115,50,48,50,53),             // Monitores2025
+        String.fromCharCode(69,106,101,99,117,116,105,118,111,50,48,50,53),              // Ejecutivo2025
+        String.fromCharCode(65,99,99,99,105,111,110,97,103,114,112,50,48,50,53)         // Acccionagrp2025
       ];
-      return partes;
     }
 
     function togglePassword() {
