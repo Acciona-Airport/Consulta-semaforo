@@ -320,7 +320,7 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const CODIGO_ACCESO_HASH = "a3ddbc42e3546a9e5c7a7b8b5db3e8d1a2f3b4c5d6e7f8a9b0c1d2e3f4a5b6";
+    const CODIGO_ACCESO_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -344,6 +344,14 @@
       }
     });
 
+    async function calcularSHA256(texto) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(texto);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     async function verificarAcceso() {
       const passwordInput = document.getElementById('password-input');
       const errorAuth = document.getElementById('error-auth');
@@ -355,28 +363,23 @@
       
       errorAuth.style.display = 'none';
       authMessage.style.display = 'none';
-      
       authLoader.style.display = 'block';
       authButton.style.display = 'none';
       
       try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(passwordInput.value);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const hashIngresado = await calcularSHA256(passwordInput.value);
         
-        if (hashHex === CODIGO_ACCESO_HASH) {
+        if (hashIngresado === CODIGO_ACCESO_HASH) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
           
-          setTimeout(function() {
+          setTimeout(() => {
             sessionStorage.setItem('autenticado', 'true');
             authContainer.classList.add('hide');
             mainContainer.style.display = 'block';
             
-            setTimeout(function() {
+            setTimeout(() => {
               mainContainer.classList.add('active');
               authContainer.style.display = 'none';
             }, 500);
@@ -481,7 +484,7 @@
             icono = "🛠️ " + estado;
           } else if (estado === "FUERA DE OPERACION") {
             estadoClass = "status-fuera-operacion";
-            icono = "◼️ " + estado;
+            icono = "❌ " + estado;
           } else if (estado === "LAVADO") {
             estadoClass = "status-lavado";
             icono = "🚿 " + estado;
