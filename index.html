@@ -312,14 +312,6 @@
   </div>
 
   <script>
-    async function sha256(message) {
-      const msgBuffer = new TextEncoder().encode(message);                    
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      return hashHex;
-    }
-
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
     const MENSAJES_CARGA = [
       "Estableciendo conexión con el servidor...",
@@ -328,7 +320,7 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const HASH_CONTRASENA = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+    const CODIGO_ACCESO_HASH = "a3ddbc42e3546a9e5c7a7b8b5db3e8d1a2f3b4c5d6e7f8a9b0c1d2e3f4a5b6";
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -367,11 +359,14 @@
       authLoader.style.display = 'block';
       authButton.style.display = 'none';
       
-      setTimeout(async function() {
-        authLoader.style.display = 'none';
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(passwordInput.value);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         
-        const inputHash = await sha256(passwordInput.value);
-        if (inputHash === HASH_CONTRASENA) {
+        if (hashHex === CODIGO_ACCESO_HASH) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
@@ -387,15 +382,19 @@
             }, 500);
           }, 1500);
         } else {
-          authMessage.textContent = "❌ Acceso denegado.";
-          authMessage.className = "auth-message auth-error";
-          authMessage.style.display = 'block';
-          errorAuth.style.display = 'block';
-          passwordInput.value = '';
-          passwordInput.focus();
-          authButton.style.display = 'block';
+          throw new Error("Acceso denegado");
         }
-      }, 1500);
+      } catch (error) {
+        authMessage.textContent = "❌ Acceso denegado.";
+        authMessage.className = "auth-message auth-error";
+        authMessage.style.display = 'block';
+        errorAuth.style.display = 'block';
+        passwordInput.value = '';
+        passwordInput.focus();
+      } finally {
+        authLoader.style.display = 'none';
+        authButton.style.display = 'block';
+      }
     }
 
     function actualizarFechaHora() {
