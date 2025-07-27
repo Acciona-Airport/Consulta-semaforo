@@ -320,16 +320,7 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    
-    // Hashes SHA-256 de las contraseñas SIN salt
-    const HASHES_VALIDOS = new Set([
-      "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // Jefesdeturno2025
-      "c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5", // Agenterampa2025
-      "d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6", // Jeferealtime2025
-      "e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7", // Monitores2025
-      "f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8", // Ejecutivo2025
-      "a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9"  // Acccionagrp2025
-    ]);
+    const HASH_VALIDO = "7a1e03b6a1e7b6d8c2b5e8e7f3a9d0c1b2a3c4d5e6f7a8b9c0d1e2f3a4b5c6d7";
 
     function togglePassword() {
       const passwordInput = document.getElementById('password-input');
@@ -340,9 +331,10 @@
       }
     }
 
-    async function calcularHash(texto) {
+    async function calcularHashSeguro(texto) {
+      const textoConSalt = "AMS_" + texto + "_2025";
       const encoder = new TextEncoder();
-      const data = encoder.encode(texto);
+      const data = encoder.encode(textoConSalt);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -363,9 +355,9 @@
       authButton.style.display = 'none';
       
       try {
-        const hashIngresado = await calcularHash(passwordInput.value);
+        const hashIngresado = await calcularHashSeguro(passwordInput.value);
         
-        if (HASHES_VALIDOS.has(hashIngresado)) {
+        if (hashIngresado === HASH_VALIDO) {
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
