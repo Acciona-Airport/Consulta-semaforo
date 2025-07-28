@@ -249,6 +249,47 @@
       cursor: pointer;
       user-select: none;
     }
+    .nav-menu {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 20px;
+      background-color: #ffffff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .nav-item {
+      padding: 8px 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .nav-item:hover {
+      background-color: #f0f0f0;
+    }
+    .nav-item.active {
+      background-color: #c62828;
+      color: white;
+    }
+    .blank-container {
+      display: none;
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      border: 1px solid #ccc;
+      position: absolute;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .blank-container.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -303,6 +344,25 @@
       <label>Observaciones:</label>
       <div class="input-estilo" id="observaciones-equipo"></div>
     </div>
+
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="mostrarPantalla('main-container')">Consulta</div>
+      <div class="nav-item" onclick="mostrarPantalla('blank-container')">Otra Pantalla</div>
+    </div>
+  </div>
+
+  <div id="blank-container" class="blank-container">
+    <div class="logo-wrapper">
+      <img src="https://raw.githubusercontent.com/Acciona-Airport/Consulta-semaforo/refs/heads/main/Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona">
+    </div>
+    <h1>Otra Pantalla</h1>
+    <div class="section">
+      <p>Esta es otra pantalla donde puedes agregar otro aplicativo.</p>
+    </div>
+    <div class="nav-menu">
+      <div class="nav-item" onclick="mostrarPantalla('main-container')">Consulta</div>
+      <div class="nav-item active" onclick="mostrarPantalla('blank-container')">Otra Pantalla</div>
+    </div>
   </div>
 
   <div id="overlay">
@@ -340,13 +400,38 @@
       }
     }
 
+    function mostrarPantalla(idPantalla) {
+      const pantallas = document.querySelectorAll('.container, .blank-container');
+      pantallas.forEach(pantalla => {
+        pantalla.classList.remove('active');
+        setTimeout(() => {
+          pantalla.style.display = 'none';
+        }, 500);
+      });
+
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.classList.remove('active');
+      });
+
+      document.getElementById(idPantalla).style.display = 'block';
+      setTimeout(() => {
+        document.getElementById(idPantalla).classList.add('active');
+      }, 50);
+
+      const clickedItem = event.target;
+      clickedItem.classList.add('active');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       if (!sessionStorage.getItem('autenticado')) {
         document.getElementById('auth-container').style.display = 'block';
         document.getElementById('main-container').style.display = 'none';
+        document.getElementById('blank-container').style.display = 'none';
       } else {
         document.getElementById('auth-container').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
+        document.getElementById('blank-container').style.display = 'none';
         setTimeout(() => {
           document.getElementById('main-container').classList.add('active');
         }, 50);
