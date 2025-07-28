@@ -31,7 +31,7 @@
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.5s ease, transform 0.5s ease;
-      margin-bottom: 60px;
+      margin-bottom: 100px; /* Aumenté este valor para dar más espacio */
     }
     .container.active {
       opacity: 1;
@@ -329,6 +329,11 @@
       font-size: 14px;
       color: #666;
     }
+    /* Nuevo estilo para el espacio adicional */
+    .espacio-adicional {
+      height: 60px; /* Aproximadamente 5cm en pantallas móviles */
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -383,6 +388,9 @@
       <label>Observaciones:</label>
       <div class="input-estilo" id="observaciones-equipo"></div>
     </div>
+    
+    <!-- Espacio adicional agregado aquí -->
+    <div class="espacio-adicional"></div>
   </div>
 
   <div id="blank-container" class="blank-container">
