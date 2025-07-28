@@ -13,9 +13,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 15px;
+      padding: 30px 15px 80px;
       margin: 0;
       overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
     }
     .container {
       background-color: #ffffff;
@@ -249,28 +251,44 @@
       cursor: pointer;
       user-select: none;
     }
-    .nav-menu {
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #ffffff;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-around;
-      width: 100%;
-      margin-top: 20px;
-      background-color: #ffffff;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 10px 0;
+      z-index: 1000;
     }
     .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 8px 15px;
       cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-    }
-    .nav-item:hover {
-      background-color: #f0f0f0;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: #555;
     }
     .nav-item.active {
-      background-color: #c62828;
-      color: white;
+      color: #c62828;
+      background-color: rgba(198, 40, 40, 0.1);
+    }
+    .nav-item:hover {
+      background-color: rgba(198, 40, 40, 0.05);
+    }
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 4px;
+    }
+    .nav-label {
+      font-size: 12px;
+      font-weight: 500;
     }
     .blank-container {
       display: none;
@@ -289,6 +307,26 @@
     .blank-container.active {
       opacity: 1;
       transform: translateY(0);
+    }
+    .blank-content {
+      text-align: center;
+      padding: 20px;
+    }
+    .blank-icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 20px;
+      opacity: 0.7;
+    }
+    .blank-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .blank-text {
+      font-size: 14px;
+      color: #666;
     }
   </style>
 </head>
@@ -344,24 +382,17 @@
       <label>Observaciones:</label>
       <div class="input-estilo" id="observaciones-equipo"></div>
     </div>
-
-    <div class="nav-menu">
-      <div class="nav-item active" onclick="mostrarPantalla('main-container')">Consulta</div>
-      <div class="nav-item" onclick="mostrarPantalla('blank-container')">Otra Pantalla</div>
-    </div>
   </div>
 
   <div id="blank-container" class="blank-container">
-    <div class="logo-wrapper">
-      <img src="https://raw.githubusercontent.com/Acciona-Airport/Consulta-semaforo/refs/heads/main/Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona">
-    </div>
-    <h1>Otra Pantalla</h1>
-    <div class="section">
-      <p>Esta es otra pantalla donde puedes agregar otro aplicativo.</p>
-    </div>
-    <div class="nav-menu">
-      <div class="nav-item" onclick="mostrarPantalla('main-container')">Consulta</div>
-      <div class="nav-item active" onclick="mostrarPantalla('blank-container')">Otra Pantalla</div>
+    <div class="blank-content">
+      <svg class="blank-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 8V12" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 16H12.01" stroke="#c62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2 class="blank-title">Pantalla en Desarrollo</h2>
+      <p class="blank-text">Esta sección estará disponible próximamente</p>
     </div>
   </div>
 
@@ -369,6 +400,23 @@
     <div class="loader"></div>
     <div id="status-mensaje" class="status-mensaje">Estableciendo conexión con el servidor...</div>
   </div>
+
+  <nav class="bottom-nav" id="bottom-nav" style="display: none;">
+    <div class="nav-item active" onclick="mostrarPantalla('main-container')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="nav-label">Inicio</span>
+    </div>
+    <div class="nav-item" onclick="mostrarPantalla('blank-container')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10.3246 4.31731C10.751 2.5609 13.249 2.5609 13.6754 4.31731C13.9508 5.45193 15.2507 5.99038 16.2478 5.38285C17.7913 4.44239 19.5576 6.2087 18.6172 7.75218C18.0096 8.74925 18.5481 10.0492 19.6827 10.3246C21.4391 10.751 21.4391 13.249 19.6827 13.6754C18.5481 13.9508 18.0096 15.2507 18.6172 16.2478C19.5576 17.7913 17.7913 19.5576 16.2478 18.6172C15.2507 18.0096 13.9508 18.5481 13.6754 19.6827C13.249 21.4391 10.751 21.4391 10.3246 19.6827C10.0492 18.5481 8.74926 18.0096 7.75219 18.6172C6.2087 19.5576 4.44239 17.7913 5.38285 16.2478C5.99038 15.2507 5.45193 13.9508 4.31731 13.6754C2.5609 13.249 2.5609 10.751 4.31731 10.3246C5.45193 10.0492 5.99037 8.74926 5.38285 7.75218C4.44239 6.2087 6.2087 4.44239 7.75219 5.38285C8.74926 5.99037 10.0492 5.45193 10.3246 4.31731Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 12C15 12.7956 14.6839 13.5587 14.1213 14.1213C13.5587 14.6839 12.7956 15 12 15C11.2044 15 10.4413 14.6839 9.87868 14.1213C9.31607 13.5587 9 12.7956 9 12C9 11.2044 9.31607 10.4413 9.87868 9.87868C10.4413 9.31607 11.2044 9 12 9C12.7956 9 13.5587 9.31607 14.1213 9.87868C14.6839 10.4413 15 11.2044 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="nav-label">Herramientas</span>
+    </div>
+  </nav>
 
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
@@ -419,7 +467,7 @@
         document.getElementById(idPantalla).classList.add('active');
       }, 50);
 
-      const clickedItem = event.target;
+      const clickedItem = event.currentTarget;
       clickedItem.classList.add('active');
     }
 
@@ -428,10 +476,12 @@
         document.getElementById('auth-container').style.display = 'block';
         document.getElementById('main-container').style.display = 'none';
         document.getElementById('blank-container').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'none';
       } else {
         document.getElementById('auth-container').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
         document.getElementById('blank-container').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'flex';
         setTimeout(() => {
           document.getElementById('main-container').classList.add('active');
         }, 50);
@@ -446,6 +496,7 @@
       const authButton = document.getElementById('auth-button');
       const authContainer = document.getElementById('auth-container');
       const mainContainer = document.getElementById('main-container');
+      const bottomNav = document.getElementById('bottom-nav');
       
       errorAuth.style.display = 'none';
       authMessage.style.display = 'none';
@@ -476,6 +527,7 @@
             sessionStorage.setItem('autenticado', 'true');
             authContainer.classList.add('hide');
             mainContainer.style.display = 'block';
+            bottomNav.style.display = 'flex';
             
             setTimeout(function() {
               mainContainer.classList.add('active');
