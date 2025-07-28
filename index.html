@@ -458,24 +458,26 @@
     function mostrarPantalla(idPantalla) {
       const pantallas = document.querySelectorAll('.container, .blank-container');
       pantallas.forEach(pantalla => {
-        pantalla.classList.remove('active');
-        setTimeout(() => {
-          pantalla.style.display = 'none';
-        }, 500);
+        if (pantalla.id === idPantalla) {
+          pantalla.style.display = 'block';
+          setTimeout(() => {
+            pantalla.classList.add('active');
+          }, 50);
+        } else {
+          pantalla.classList.remove('active');
+          setTimeout(() => {
+            pantalla.style.display = 'none';
+          }, 500);
+        }
       });
 
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(item => {
         item.classList.remove('active');
+        if (item.textContent.includes(idPantalla === 'main-container' ? 'Inicio' : 'Herramientas')) {
+          item.classList.add('active');
+        }
       });
-
-      document.getElementById(idPantalla).style.display = 'block';
-      setTimeout(() => {
-        document.getElementById(idPantalla).classList.add('active');
-      }, 50);
-
-      const clickedItem = event.currentTarget;
-      clickedItem.classList.add('active');
     }
 
     document.addEventListener('DOMContentLoaded', function() {
