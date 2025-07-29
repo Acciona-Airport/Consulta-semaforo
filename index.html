@@ -66,16 +66,15 @@
       max-width: 180px;
       height: auto;
       position: absolute;
-      mask-image: linear-gradient(to right, black 0%, black 100%);
-      transition: mask-image 1.5s ease, opacity 1.5s ease;
+      transition: opacity 1.5s ease;
     }
     .logo-semaforo {
       max-width: 240px;
       height: auto;
       position: absolute;
-      mask-image: linear-gradient(to right, transparent 0%, transparent 100%);
-      transition: mask-image 1.5s ease, opacity 1.5s ease;
+      transition: opacity 1.5s ease;
       opacity: 0;
+      margin-top: -20px;
     }
     h1 {
       font-size: 16px;
@@ -478,15 +477,11 @@
       const logoAcciona = document.getElementById('logo-acciona');
       const logoSemaforo = document.getElementById('logo-semaforo');
       
-      if (logoAcciona.style.maskImage.includes('black 100%')) {
-        logoAcciona.style.maskImage = 'linear-gradient(to right, black 0%, transparent 100%)';
+      if (logoAcciona.style.opacity === '1' || logoAcciona.style.opacity === '') {
         logoAcciona.style.opacity = '0';
-        logoSemaforo.style.maskImage = 'linear-gradient(to right, black 0%, black 100%)';
         logoSemaforo.style.opacity = '1';
       } else {
-        logoAcciona.style.maskImage = 'linear-gradient(to right, black 0%, black 100%)';
         logoAcciona.style.opacity = '1';
-        logoSemaforo.style.maskImage = 'linear-gradient(to right, transparent 0%, transparent 100%)';
         logoSemaforo.style.opacity = '0';
       }
     }
