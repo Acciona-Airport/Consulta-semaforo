@@ -346,6 +346,17 @@
     .refresh-btn:hover {
       background-color: #b71c1c;
     }
+    .refresh-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -420,7 +431,10 @@
     <div id="status-mensaje" class="status-mensaje">Estableciendo conexión con el servidor...</div>
   </div>
 
-  <button id="refresh-btn" class="refresh-btn" onclick="actualizarHojasGoogle()">Actualizar</button>
+  <button id="refresh-btn" class="refresh-btn" onclick="actualizarHojasGoogle()">
+    <span id="refresh-spinner" class="refresh-spinner"></span>
+    <span id="refresh-text">Actualizar</span>
+  </button>
 
   <nav class="bottom-nav" id="bottom-nav" style="display: none;">
     <div class="nav-item active" onclick="mostrarPantalla('main-container')">
@@ -686,12 +700,30 @@
     }
 
     function actualizarHojasGoogle() {
+        const refreshBtn = document.getElementById('refresh-btn');
+        const refreshSpinner = document.getElementById('refresh-spinner');
+        const refreshText = document.getElementById('refresh-text');
+        
+        refreshSpinner.style.display = 'inline-block';
+        refreshText.textContent = 'Actualizando...';
+        refreshBtn.disabled = true;
+
         const iframes = document.querySelectorAll('.sheet-container iframe');
         iframes.forEach(iframe => {
             const timestamp = new Date().getTime();
             const newSrc = iframe.src.split('&')[0] + '&timestamp=' + timestamp;
             iframe.src = newSrc;
         });
+
+        setTimeout(function() {
+            refreshSpinner.style.display = 'none';
+            refreshText.textContent = 'Actualizado ✓';
+            
+            setTimeout(function() {
+                refreshText.textContent = 'Actualizar';
+                refreshBtn.disabled = false;
+            }, 2000);
+        }, 1500);
     }
 
     setInterval(actualizarHojasGoogle, 300000);
