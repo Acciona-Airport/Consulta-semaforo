@@ -342,8 +342,15 @@
       z-index: 1001;
       display: none;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: background-color 0.3s;
     }
-    .refresh-btn:hover {
+    .refresh-btn.actualizando {
+      background-color: #ffc107;
+    }
+    .refresh-btn.actualizado {
+      background-color: #28a745;
+    }
+    .refresh-btn:hover:not(.actualizando):not(.actualizado) {
       background-color: #b71c1c;
     }
     .refresh-spinner {
@@ -704,6 +711,8 @@
         const refreshSpinner = document.getElementById('refresh-spinner');
         const refreshText = document.getElementById('refresh-text');
         
+        refreshBtn.classList.remove('actualizado');
+        refreshBtn.classList.add('actualizando');
         refreshSpinner.style.display = 'inline-block';
         refreshText.textContent = 'Actualizando...';
         refreshBtn.disabled = true;
@@ -717,9 +726,12 @@
 
         setTimeout(function() {
             refreshSpinner.style.display = 'none';
+            refreshBtn.classList.remove('actualizando');
+            refreshBtn.classList.add('actualizado');
             refreshText.textContent = 'Actualizado ✓';
             
             setTimeout(function() {
+                refreshBtn.classList.remove('actualizado');
                 refreshText.textContent = 'Actualizar';
                 refreshBtn.disabled = false;
             }, 2000);
