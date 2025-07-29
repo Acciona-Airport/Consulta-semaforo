@@ -415,7 +415,7 @@
         <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span class="nav-label">Inicio</span>
+      <span class="nav-label">Buscador</span>
     </div>
     <div class="nav-item" onclick="mostrarPantalla('blank-container')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -475,7 +475,7 @@
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(item => {
         item.classList.remove('active');
-        if (item.textContent.includes(idPantalla === 'main-container' ? 'Inicio' : 'Herramientas')) {
+        if (item.textContent.includes(idPantalla === 'main-container' ? 'Inicio' : 'Semaforo')) {
           item.classList.add('active');
         }
       });
@@ -666,6 +666,23 @@
         mostrarOverlay(false);
       }
     }
+
+    function actualizarHojasGoogle() {
+        const iframes = document.querySelectorAll('.sheet-container iframe');
+        iframes.forEach(iframe => {
+            const timestamp = new Date().getTime();
+            const newSrc = iframe.src.split('&')[0] + '&timestamp=' + timestamp;
+            iframe.src = newSrc;
+        });
+    }
+
+    setInterval(actualizarHojasGoogle, 300000);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('autenticado')) {
+            setTimeout(actualizarHojasGoogle, 1000);
+        }
+    });
 
     document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
