@@ -64,12 +64,24 @@
       max-width: 180px;
       height: auto;
       margin-bottom: 15px;
+      position: absolute;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+    .logo-acciona.hidden {
+      opacity: 0;
     }
     .logo-semaforo {
       max-width: 240px;
       height: auto;
       margin: 10px auto 20px;
       display: block;
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .logo-semaforo.visible {
+      opacity: 1;
     }
     h1 {
       font-size: 16px;
@@ -389,11 +401,11 @@
 
   <div id="main-container" class="container">
     <div class="logo-wrapper">
-      <img src="Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona">
+      <img src="Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona" id="logo-acciona">
+      <img src="semaforo.png" alt="semaforo.png" class="logo-semaforo" id="logo-semaforo">
     </div>
 
     <h1>Consulta de Estado de Equipos - Semaforo AMS</h1>
-    <img src="semaforo.png" alt="semaforo.png" class="logo-semaforo">
     
     <div class="datetime-box" id="datetime"></div>
 
@@ -467,6 +479,21 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
+
+    function alternarLogos() {
+      const logoAcciona = document.getElementById('logo-acciona');
+      const logoSemaforo = document.getElementById('logo-semaforo');
+      
+      if (logoAcciona.classList.contains('hidden')) {
+        logoAcciona.classList.remove('hidden');
+        logoSemaforo.classList.remove('visible');
+      } else {
+        logoAcciona.classList.add('hidden');
+        logoSemaforo.classList.add('visible');
+      }
+    }
+
+    setInterval(alternarLogos, 3000);
 
     function obtenerContrasenas() {
       return [
