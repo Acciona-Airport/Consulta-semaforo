@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -482,6 +483,8 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
+    let datosCompletos = null;
+    let intervaloActualizacion = null;
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -566,6 +569,8 @@
         setTimeout(() => {
           document.getElementById('main-container').classList.add('active');
         }, 50);
+        cargarDatosCompletos();
+        iniciarActualizacionAutomatica();
       }
     });
 
@@ -613,6 +618,8 @@
             setTimeout(function() {
               mainContainer.classList.add('active');
               authContainer.style.display = 'none';
+              cargarDatosCompletos();
+              iniciarActualizacionAutomatica();
             }, 500);
           }, 1500);
         } else {
@@ -656,13 +663,25 @@
       document.getElementById("observaciones-equipo").innerText = "";
     }
 
+    async function cargarDatosCompletos() {
+      try {
+        const response = await fetch(URL_GET + "?tipo=completo");
+        datosCompletos = await response.json();
+      } catch (error) {
+        console.error("Error al cargar datos completos:", error);
+      }
+    }
+
+    function iniciarActualizacionAutomatica() {
+      if (intervaloActualizacion) {
+        clearInterval(intervaloActualizacion);
+      }
+      intervaloActualizacion = setInterval(cargarDatosCompletos, 60000);
+    }
+
     async function consultarEstado() {
       const id = document.getElementById("numero-equipo").value.trim();
-      const familiaBox = document.getElementById("familia-equipo");
-      const statusBox = document.getElementById("status-equipo");
-      const statusDetalle = document.getElementById("status-detalle");
-      const obsBox = document.getElementById("observaciones-equipo");
-
+      
       if (!id) {
         alert("Por favor ingrese un número de equipo");
         return;
@@ -681,21 +700,27 @@
       }, INTERVALO_MENSAJES);
 
       try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
-        const data = await response.json();
+        let data = null;
+        
+        if (datosCompletos) {
+          data = datosCompletos.find(item => item.ID === id) || { error: "Equipo no encontrado" };
+        } else {
+          const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
+          data = await response.json();
+        }
 
         clearInterval(mensajeInterval);
 
         if (data.error) {
-          familiaBox.innerText = "Equipo no encontrado";
-          statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
-          statusDetalle.className = "status-box status-otros";
+          document.getElementById("familia-equipo").innerText = "Equipo no encontrado";
+          document.getElementById("status-equipo").innerText = "N/A";
+          document.getElementById("status-detalle").innerText = data.error;
+          document.getElementById("status-detalle").className = "status-box status-otros";
         } else {
-          familiaBox.innerText = data.FAMILIA || "Sin información";
+          document.getElementById("familia-equipo").innerText = data.FAMILIA || "Sin información";
           
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
+          document.getElementById("status-equipo").innerText = "Estado: " + estado;
           
           let estadoClass = "status-otros";
           let icono = "";
@@ -722,16 +747,16 @@
             icono = estado;
           }
           
-          statusDetalle.innerHTML = icono;
-          statusDetalle.className = "status-box " + estadoClass;
+          document.getElementById("status-detalle").innerHTML = icono;
+          document.getElementById("status-detalle").className = "status-box " + estadoClass;
           
-          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
+          document.getElementById("observaciones-equipo").innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
         console.error("Error al consultar:", error);
-        statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
-        statusDetalle.className = "status-box status-inoperativo";
+        document.getElementById("status-equipo").innerText = "Error";
+        document.getElementById("status-detalle").innerText = "Ocurrió un error al consultar el estado";
+        document.getElementById("status-detalle").className = "status-box status-inoperativo";
       } finally {
         clearInterval(mensajeInterval);
         mostrarOverlay(false);
