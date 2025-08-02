@@ -474,7 +474,7 @@
   </nav>
 
   <script>
-    const URL_GET = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhnxl-uORWx2zRr6EIHXehyoDVsFp3M1WUlVVe97JPHpXc-gSkkxSdVu8uH6i-ZbR3Sz36daK6XQKj92PfUqCvr39UDT6mXv9lt1al38sLugVz3sN_UBtVNzgEsbmwx6ZUMsXw2LRgvkSBCoMFfzrepGveM4ile3_M9AWkXfIT7M7zMNtYislbFzW8zRUUF3H8DdkQTjP0mAZ5qGS8ZpsH9QlpJGWR2MCOOnj_YJvJt7yu0U2tWQLBULJj5_RpLn_bgFZquFkbYJJroqjRID6rCj-i8aQ&lib=Mws4MUeCqYnMY2MOQd7YWZvnpoEf-LPgl";
+    const URL_BASE = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLhnxl-uORWx2zRr6EIHXehyoDVsFp3M1WUlVVe97JPHpXc-gSkkxSdVu8uH6i-ZbR3Sz36daK6XQKj92PfUqCvr39UDT6mXv9lt1al38sLugVz3sN_UBtVNzgEsbmwx6ZUMsXw2LRgvkSBCoMFfzrepGveM4ile3_M9AWkXfIT7M7zMNtYislbFzW8zRUUF3H8DdkQTjP0mAZ5qGS8ZpsH9QlpJGWR2MCOOnj_YJvJt7yu0U2tWQLBULJj5_RpLn_bgFZquFkbYJJroqjRID6rCj-i8aQ&lib=Mws4MUeCqYnMY2MOQd7YWZvnpoEf-LPgl";
     const MENSAJES_CARGA = [
       "Estableciendo conexión con el servidor...",
       "Realizando cruce de información...",
@@ -677,50 +677,59 @@
       }, INTERVALO_MENSAJES);
 
       try {
-        const response = await fetch(URL_GET + "&id=" + encodeURIComponent(id));
+        const response = await fetch(`${URL_BASE}&id=${encodeURIComponent(id)}`);
         const data = await response.json();
 
         clearInterval(mensajeInterval);
 
-        if (data.error) {
+        if (!data.equipos || data.equipos.length === 0) {
           document.getElementById("familia-equipo").innerText = "Equipo no encontrado";
           document.getElementById("status-equipo").innerText = "N/A";
           document.getElementById("status-detalle").innerText = "El equipo no existe en la base de datos";
           document.getElementById("status-detalle").className = "status-box status-otros";
         } else {
-          document.getElementById("familia-equipo").innerText = data.FAMILIA || "Sin información";
+          const equipoEncontrado = data.equipos.find(equipo => equipo.ID == id);
           
-          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          document.getElementById("status-equipo").innerText = "Estado: " + estado;
-          
-          let estadoClass = "status-otros";
-          let icono = "";
-          
-          if (estado.includes("OPERATIVO")) {
-            estadoClass = "status-operativo";
-            icono = "✅ " + estado;
-          } else if (estado.includes("INOPERATIVO")) {
-            estadoClass = "status-inoperativo";
-            icono = "❌ " + estado;
-          } else if (estado.includes("PREVENTIVO")) {
-            estadoClass = "status-preventivo";
-            icono = "🛠️ " + estado;
-          } else if (estado.includes("FUERA DE OPERACION")) {
-            estadoClass = "status-fuera-operacion";
-            icono = "❌ " + estado;
-          } else if (estado.includes("LAVADO")) {
-            estadoClass = "status-lavado";
-            icono = "🚿 " + estado;
-          } else if (estado.includes("REVISIÓN") || estado.includes("REVISION")) {
-            estadoClass = "status-revision";
-            icono = "🔍 " + estado;
+          if (!equipoEncontrado) {
+            document.getElementById("familia-equipo").innerText = "Equipo no encontrado";
+            document.getElementById("status-equipo").innerText = "N/A";
+            document.getElementById("status-detalle").innerText = "El equipo no existe en la base de datos";
+            document.getElementById("status-detalle").className = "status-box status-otros";
           } else {
-            icono = estado;
+            document.getElementById("familia-equipo").innerText = equipoEncontrado.FAMILIA || "Sin información";
+            
+            const estado = (equipoEncontrado["STATUS ✎"] || "Desconocido").toUpperCase();
+            document.getElementById("status-equipo").innerText = "Estado: " + estado;
+            
+            let estadoClass = "status-otros";
+            let icono = "";
+            
+            if (estado.includes("OPERATIVO")) {
+              estadoClass = "status-operativo";
+              icono = "✅ " + estado;
+            } else if (estado.includes("INOPERATIVO")) {
+              estadoClass = "status-inoperativo";
+              icono = "❌ " + estado;
+            } else if (estado.includes("PREVENTIVO")) {
+              estadoClass = "status-preventivo";
+              icono = "🛠️ " + estado;
+            } else if (estado.includes("FUERA DE OPERACION")) {
+              estadoClass = "status-fuera-operacion";
+              icono = "❌ " + estado;
+            } else if (estado.includes("LAVADO")) {
+              estadoClass = "status-lavado";
+              icono = "🚿 " + estado;
+            } else if (estado.includes("REVISIÓN") || estado.includes("REVISION")) {
+              estadoClass = "status-revision";
+              icono = "🔍 " + estado;
+            } else {
+              icono = estado;
+            }
+            
+            document.getElementById("status-detalle").innerHTML = icono;
+            document.getElementById("status-detalle").className = "status-box " + estadoClass;
+            document.getElementById("observaciones-equipo").innerText = equipoEncontrado.OBSERVACIONES || "Sin observaciones";
           }
-          
-          document.getElementById("status-detalle").innerHTML = icono;
-          document.getElementById("status-detalle").className = "status-box " + estadoClass;
-          document.getElementById("observaciones-equipo").innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
         console.error("Error al consultar:", error);
