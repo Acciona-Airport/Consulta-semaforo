@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Consulta de Estado de Equipos - Semaforo AMS</title>
+  <title>Consulta de Estado de Equipos - Semáforo AMS</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -23,7 +23,7 @@
       background-color: #ffffff;
       padding: 25px;
       border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
       max-width: 400px;
       width: 100%;
       border: 1px solid #ccc;
@@ -41,7 +41,7 @@
       background-color: #ffffff;
       padding: 25px;
       border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
       max-width: 400px;
       width: 100%;
       border: 1px solid #ccc;
@@ -81,7 +81,6 @@
       color: #111;
       text-align: center;
       margin-bottom: 15px;
-      white-space: normal;
       width: 100%;
       padding: 0 10px;
       font-weight: 600;
@@ -105,11 +104,10 @@
       background-color: #fafafa;
       color: #000;
       transition: border-color 0.3s, box-shadow 0.3s;
-      resize: none;
     }
     .input-estilo:focus {
       border-color: #c62828;
-      box-shadow: 0 0 5px rgba(198, 40, 40, 0.4);
+      box-shadow: 0 0 5px rgba(198,40,40,0.4);
       outline: none;
     }
     .datetime-box {
@@ -131,50 +129,21 @@
       font-weight: bold;
       font-size: 14px;
     }
-    .status-operativo {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .status-inoperativo {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .status-preventivo {
-      background-color: #cce5ff;
-      color: #004085;
-      border: 1px solid #b8daff;
-    }
-    .status-fuera-operacion {
-      background-color: #6c757d;
-      color: #ffffff;
-      border: 1px solid #5a6268;
-    }
-    .status-lavado {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-    }
-    .status-revision {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-    .status-otros {
-      background-color: #e2e3e5;
-      color: #383d41;
-      border: 1px solid #d6d8db;
-    }
+    .status-operativo { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .status-inoperativo { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .status-preventivo { background-color: #cce5ff; color: #004085; border: 1px solid #b8daff; }
+    .status-fuera-operacion { background-color: #6c757d; color: #fff; border: 1px solid #5a6268; }
+    .status-lavado { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .status-revision { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    .status-otros { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; }
     .spinner {
       display: inline-block;
       width: 15px;
       height: 15px;
-      border: 2px solid rgba(198, 40, 40, 0.3);
+      border: 2px solid rgba(198,40,40,0.3);
       border-top-color: #c62828;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      vertical-align: middle;
       margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -182,9 +151,10 @@
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255,255,255,0.95);
       display: none;
       z-index: 9999;
+      display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
@@ -192,610 +162,171 @@
     #overlay .loader {
       width: 60px;
       height: 60px;
-      border: 6px solid rgba(198, 40, 40, 0.2);
+      border: 6px solid rgba(198,40,40,0.2);
       border-top: 6px solid #c62828;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-    .btn {
-      background-color: #c62828;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 10px;
-      width: 100%;
-      transition: background-color 0.3s;
-    }
-    .btn:hover {
-      background-color: #b71c1c;
-    }
-    .status-mensaje {
-      margin-top: 15px;
-      font-size: 16px;
-      color: #333;
-      text-align: center;
-    }
-    .error-auth {
-      color: #c62828;
-      margin-top: 10px;
-      font-weight: bold;
-      display: none;
-    }
-    .auth-loader {
-      width: 30px;
-      height: 30px;
-      border: 4px solid rgba(198, 40, 40, 0.2);
-      border-top: 4px solid #c62828;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 10px auto;
-      display: none;
-    }
-    .auth-message {
-      font-size: 16px;
-      font-weight: bold;
-      margin: 10px 0;
-      display: none;
-    }
-    .auth-success {
-      color: #155724;
-    }
-    .auth-error {
-      color: #721c24;
-    }
-    .password-container {
-      position: relative;
-    }
-    .toggle-password {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      user-select: none;
-    }
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #ffffff;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0;
-      z-index: 1000;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 5px 12px;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: #555;
-    }
-    .nav-item.active {
-      color: #c62828;
-      background-color: rgba(198, 40, 40, 0.1);
-    }
-    .nav-item:hover {
-      background-color: rgba(198, 40, 40, 0.05);
-    }
-    .nav-icon {
-      width: 20px;
-      height: 20px;
-      margin-bottom: 2px;
-    }
-    .nav-label {
-      font-size: 11px;
-      font-weight: 500;
-    }
-    .blank-container {
-      display: none;
-      background-color: #ffffff;
-      padding: 25px;
-      border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 800px;
-      width: 100%;
-      border: 1px solid #ccc;
-      position: absolute;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-    .blank-container.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .sheet-container {
-      width: 100%;
-      height: 70vh;
-      border: none;
-      overflow: hidden;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      position: relative;
-    }
-    .sheet-container iframe {
-      width: 300%;
-      height: 300%;
-      transform: scale(0.33);
-      transform-origin: 0 0;
-    }
-    .sheet-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 100;
-    }
-    .espacio-adicional {
-      height: 60px;
-      width: 100%;
-    }
-    .refresh-btn {
-      position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #c62828;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      z-index: 1001;
-      display: none;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      transition: background-color 0.3s;
-    }
-    .refresh-btn.actualizando {
-      background-color: #ffc107;
-    }
-    .refresh-btn.actualizado {
-      background-color: #28a745;
-    }
-    .refresh-btn:hover:not(.actualizando):not(.actualizado) {
-      background-color: #b71c1c;
-    }
-    .refresh-spinner {
-      display: none;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-top: 3px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
+    .btn { background-color: #c62828; color: #fff; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; width: 100%; transition: background-color 0.3s; }
+    .btn:hover { background-color: #b71c1c; }
+    .status-mensaje { margin-top: 15px; font-size: 16px; color: #333; text-align: center; }
+    .error-auth { color: #c62828; margin-top: 10px; font-weight: bold; display: none; }
+    .auth-loader { width: 30px; height: 30px; border: 4px solid rgba(198,40,40,0.2); border-top: 4px solid #c62828; border-radius: 50%; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
+    .auth-message { font-size: 16px; font-weight: bold; margin: 10px 0; display: none; }
+    .auth-success { color: #155724; }
+    .auth-error { color: #721c24; }
+    .password-container { position: relative; }
+    .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-around; padding: 8px 0; z-index: 1000; }
+    .nav-item { cursor: pointer; padding: 5px 12px; border-radius: 8px; text-decoration: none; color: #555; }
+    .nav-item.active { color: #c62828; background: rgba(198,40,40,0.1); }
+    .espacio-adicional { height: 60px; width: 100%; }
+    .sheet-container iframe { width: 300%; height: 300%; transform: scale(0.33); transform-origin: 0 0; }
+    .refresh-btn { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: #c62828; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; display: none; }
+    .refresh-btn.actualizando { background: #ffc107; }
+    .refresh-btn.actualizado { background: #28a745; }
+    .refresh-spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; }
   </style>
 </head>
 <body>
   <div id="auth-container" class="auth-container">
-    <div class="logo-wrapper">
-      <img src="Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona">
-    </div>
-    <h1>Acceso al sistema de consulta - Semaforo equipos AMS. 🔐</h1>
+    <div class="logo-wrapper"><img src="Acciona_logo.png" class="logo-acciona"></div>
+    <h1>Acceso al sistema de consulta - Semáforo equipos AMS 🔐</h1>
     <div class="section">
       <label for="password-input">Ingrese el código de acceso:</label>
       <div class="password-container">
-        <input type="password" class="input-estilo" id="password-input" placeholder="Código de acceso" />
+        <input type="password" id="password-input" class="input-estilo" />
         <span class="toggle-password" onclick="togglePassword()">👁️‍🗨️</span>
       </div>
-      <div id="error-auth" class="error-auth">Código incorrecto. Intente nuevamente.</div>
-      
+      <div id="error-auth" class="error-auth">Código incorrecto</div>
       <div id="auth-loader" class="auth-loader"></div>
       <div id="auth-message" class="auth-message"></div>
-      
       <button id="auth-button" class="btn" onclick="verificarAcceso()">Ingresar</button>
     </div>
   </div>
 
   <div id="main-container" class="container">
     <div class="logo-wrapper">
-      <img src="Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona" id="logo-acciona">
-      <img src="semaforo.png" alt="semaforo.png" class="logo-semaforo" id="logo-semaforo">
+      <img src="Acciona_logo.png" id="logo-acciona" class="logo-acciona">
+      <img src="semaforo.png" id="logo-semaforo" class="logo-semaforo">
     </div>
-
-    <h1>Consulta de Estado de Equipos - Semaforo AMS</h1>
-    
-    <div class="datetime-box" id="datetime"></div>
-
+    <h1>Consulta de Estado de Equipos - Semáforo AMS</h1>
+    <div id="datetime" class="datetime-box"></div>
     <div class="section">
       <label for="numero-equipo">Número de equipo:</label>
-      <input type="text" class="input-estilo" id="numero-equipo" placeholder="Ej: 51115" />
+      <input type="text" id="numero-equipo" class="input-estilo" placeholder="Ej: 51115">
       <button class="btn" onclick="consultarEstado()">Buscar</button>
     </div>
-
     <div class="section">
-      <label>Familia del equipo:</label>
-      <div class="input-estilo" id="familia-equipo"></div>
+      <label>Familia:</label><div id="familia-equipo" class="input-estilo"></div>
     </div>
-
     <div class="section">
-      <label>Estado actual:</label>
-      <div class="input-estilo" id="status-equipo"></div>
+      <label>Estado:</label><div id="status-equipo" class="input-estilo"></div>
       <div id="status-detalle" class="status-box"></div>
     </div>
-
     <div class="section">
-      <label>Observaciones:</label>
-      <div class="input-estilo" id="observaciones-equipo"></div>
+      <label>Observaciones:</label><div id="observaciones-equipo" class="input-estilo"></div>
     </div>
-    
     <div class="espacio-adicional"></div>
   </div>
 
   <div id="blank-container" class="blank-container">
     <div class="sheet-container">
-      <iframe 
-        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRLuOCyntG8ZcA37o7cj2HcDAEBYjwm4qsMVa6UgmnWmFGPkA9fBHlwyMV4k_XOmdvGBV1RrBzwLf6D/pubhtml?gid=1192655439&single=true" 
-        width="100%" 
-        height="100%"
-        frameborder="0"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms">
-      </iframe>
+      <iframe src="https://docs.google.com/spreadsheets/d/e/.../pubhtml?gid=1192655439&single=true" sandbox="allow-same-origin allow-scripts"></iframe>
     </div>
   </div>
 
-  <div id="overlay">
-    <div class="loader"></div>
-    <div id="status-mensaje" class="status-mensaje">Estableciendo conexión con el servidor...</div>
-  </div>
-
-  <button id="refresh-btn" class="refresh-btn" onclick="actualizarHojasGoogle()">
-    <span id="refresh-spinner" class="refresh-spinner"></span>
-    <span id="refresh-text">Actualizar</span>
-  </button>
-
-  <nav class="bottom-nav" id="bottom-nav" style="display: none;">
-    <div class="nav-item active" onclick="mostrarPantalla('main-container')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span class="nav-label">Buscador</span>
-    </div>
-    <div class="nav-item" onclick="mostrarPantalla('blank-container')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span class="nav-label">Semaforo</span>
-    </div>
-  </nav>
+  <div id="overlay"><div class="loader"></div><div id="status-mensaje" class="status-mensaje">Consultando...</div></div>
+  <button id="refresh-btn" class="refresh-btn" onclick="actualizarHojasGoogle()"><span id="refresh-spinner" class="refresh-spinner"></span><span id="refresh-text">Actualizar</span></button>
+  <nav id="bottom-nav" class="bottom-nav"><div class="nav-item active" onclick="mostrarPantalla('main-container')">Buscador</div><div class="nav-item" onclick="mostrarPantalla('blank-container')">Semáforo</div></nav>
 
   <script>
-    const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
-    const MENSAJES_CARGA = [
-      "Estableciendo conexión con el servidor...",
-      "Realizando cruce de información...",
-      "Consultando la base de datos...",
-      "Procesando resultados..."
-    ];
+    const URL_GET_ALL = "https://script.google.com/macros/s/.../exec?tipo=todos";
+    const MENSAJES_CARGA = ["Estableciendo conexión...", "Procesando...", "Consultando...", "Resultados..."];
     const INTERVALO_MENSAJES = 4000;
+    let tablaLocal = [];
 
-    function alternarLogos() {
-      const logoAcciona = document.getElementById('logo-acciona');
-      const logoSemaforo = document.getElementById('logo-semaforo');
-      
-      if (logoAcciona.style.opacity === '1' || logoAcciona.style.opacity === '') {
-        logoAcciona.style.opacity = '0';
-        logoSemaforo.style.opacity = '1';
-      } else {
-        logoAcciona.style.opacity = '1';
-        logoSemaforo.style.opacity = '0';
-      }
+    async function cargarDatosLocales() {
+      try {
+        const r = await fetch(URL_GET_ALL);
+        const j = await r.json();
+        if (Array.isArray(j)) tablaLocal = j;
+      } catch(e){ console.error(e); }
     }
-
-    setInterval(alternarLogos, 3000);
-
-    function obtenerContrasenas() {
-      return [
-        String.fromCharCode(74,101,102,101,115,100,101,112,101,113,50,48,50,53),  
-        String.fromCharCode(79,112,101,114,97,99,105,111,110,101,115,50,48,50,53),        
-        String.fromCharCode(74,101,102,101,115,100,101,116,117,114,110,111,50,48,50,53),  
-        String.fromCharCode(65,103,101,110,116,101,114,97,109,112,97,50,48,50,53),        
-        String.fromCharCode(74,101,102,101,114,101,97,108,116,105,109,101,50,48,50,53), 
-        String.fromCharCode(77,111,110,105,116,111,114,101,115,50,48,50,53),             
-        String.fromCharCode(69,106,101,99,117,116,105,118,111,50,48,50,53),              
-        String.fromCharCode(65,99,99,99,105,111,110,97,103,114,112,50,48,50,53)         
-      ];
-    }
+    setInterval(cargarDatosLocales,60000);
+    cargarDatosLocales();
 
     function togglePassword() {
-      const passwordInput = document.getElementById('password-input');
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-      } else {
-        passwordInput.type = 'password';
-      }
+      const p = document.getElementById('password-input');
+      p.type = p.type==='password'?'text':'password';
     }
 
-    function mostrarPantalla(idPantalla) {
-      const pantallas = document.querySelectorAll('.container, .blank-container');
-      pantallas.forEach(pantalla => {
-        if (pantalla.id === idPantalla) {
-          pantalla.style.display = 'block';
-          setTimeout(() => {
-            pantalla.classList.add('active');
-          }, 50);
-        } else {
-          pantalla.classList.remove('active');
-          setTimeout(() => {
-            pantalla.style.display = 'none';
-          }, 500);
-        }
+    function mostrarPantalla(id) {
+      document.querySelectorAll('.container,.blank-container,.auth-container').forEach(el=>{
+        el.style.display = el.id===id?'block':'none';
+        el.classList.toggle('active', el.id===id);
       });
-
-      const navItems = document.querySelectorAll('.nav-item');
-      navItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.textContent.includes(idPantalla === 'main-container' ? 'Inicio' : 'Semaforo')) {
-          item.classList.add('active');
-        }
-      });
-
-      const refreshBtn = document.getElementById('refresh-btn');
-      if (idPantalla === 'blank-container') {
-        refreshBtn.style.display = 'block';
-      } else {
-        refreshBtn.style.display = 'none';
-      }
+      document.getElementById('bottom-nav').style.display = sessionStorage.getItem('autenticado')?'flex':'none';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      if (!sessionStorage.getItem('autenticado')) {
-        document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('main-container').style.display = 'none';
-        document.getElementById('blank-container').style.display = 'none';
-        document.getElementById('bottom-nav').style.display = 'none';
-      } else {
-        document.getElementById('auth-container').style.display = 'none';
-        document.getElementById('main-container').style.display = 'block';
-        document.getElementById('blank-container').style.display = 'none';
-        document.getElementById('bottom-nav').style.display = 'flex';
-        setTimeout(() => {
-          document.getElementById('main-container').classList.add('active');
-        }, 50);
-      }
+    document.addEventListener('DOMContentLoaded',()=> {
+      if(sessionStorage.getItem('autenticado')) mostrarPantalla('main-container');
+      else mostrarPantalla('auth-container');
     });
 
     function verificarAcceso() {
-      const passwordInput = document.getElementById('password-input');
-      const errorAuth = document.getElementById('error-auth');
-      const authLoader = document.getElementById('auth-loader');
-      const authMessage = document.getElementById('auth-message');
-      const authButton = document.getElementById('auth-button');
-      const authContainer = document.getElementById('auth-container');
-      const mainContainer = document.getElementById('main-container');
-      const bottomNav = document.getElementById('bottom-nav');
-      
-      errorAuth.style.display = 'none';
-      authMessage.style.display = 'none';
-      
-      authLoader.style.display = 'block';
-      authButton.style.display = 'none';
-      
-      setTimeout(function() {
-        authLoader.style.display = 'none';
-        
-        const contrasenasValidas = obtenerContrasenas();
-        const inputValor = passwordInput.value;
-        let accesoPermitido = false;
-        
-        for (let i = 0; i < contrasenasValidas.length; i++) {
-          if (inputValor === contrasenasValidas[i]) {
-            accesoPermitido = true;
-            break;
-          }
-        }
-        
-        if (accesoPermitido) {
-          authMessage.textContent = "✅ Acceso validado.";
-          authMessage.className = "auth-message auth-success";
-          authMessage.style.display = 'block';
-          
-          setTimeout(function() {
-            sessionStorage.setItem('autenticado', 'true');
-            authContainer.classList.add('hide');
-            mainContainer.style.display = 'block';
-            bottomNav.style.display = 'flex';
-            
-            setTimeout(function() {
-              mainContainer.classList.add('active');
-              authContainer.style.display = 'none';
-            }, 500);
-          }, 1500);
-        } else {
-          authMessage.textContent = "❌ Acceso denegado.";
-          authMessage.className = "auth-message auth-error";
-          authMessage.style.display = 'block';
-          errorAuth.style.display = 'block';
-          passwordInput.value = '';
-          passwordInput.focus();
-          authButton.style.display = 'block';
-        }
-      }, 1500);
+      const v = document.getElementById('password-input').value;
+      const validas = cargarContrasenas(); // tu función de contraseñas
+      if(validas.includes(v)){ sessionStorage.setItem('autenticado','1'); mostrarPantalla('main-container'); }
+      else document.getElementById('error-auth').style.display='block';
     }
+
+    function cargarContrasenas(){ return [
+      String.fromCharCode(74,101,102,101,115,100,101,112,101,113,50,48,50,53),
+      /* ... resto ... */
+    ]; }
 
     function actualizarFechaHora() {
-      const now = new Date();
-      const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      const diaSemana = dias[now.getDay()];
-      const dia = now.getDate();
-      const mes = meses[now.getMonth()];
-      const anio = now.getFullYear();
-      const hora = String(now.getHours()).padStart(2, '0');
-      const minutos = String(now.getMinutes()).padStart(2, '0');
-      const segundos = String(now.getSeconds()).padStart(2, '0');
-      const fechaFormateada = `${diaSemana}, ${dia} de ${mes} de ${anio}, ${hora}:${minutos}:${segundos}`;
-      document.getElementById("datetime").innerText = fechaFormateada;
+      const d=new Date();
+      const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      document.getElementById('datetime').innerText = `${dias[d.getDay()]}, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
     }
-    setInterval(actualizarFechaHora, 1000);
-    actualizarFechaHora();
+    setInterval(actualizarFechaHora,1000); actualizarFechaHora();
 
-    function mostrarOverlay(mostrar) {
-      document.getElementById("overlay").style.display = mostrar ? "flex" : "none";
-    }
-
-    function limpiarResultados() {
-      document.getElementById("familia-equipo").innerText = "";
-      document.getElementById("status-equipo").innerText = "";
-      document.getElementById("status-detalle").innerText = "";
-      document.getElementById("status-detalle").className = "status-box";
-      document.getElementById("observaciones-equipo").innerText = "";
-    }
-
-    async function consultarEstado() {
-      const id = document.getElementById("numero-equipo").value.trim();
-      const familiaBox = document.getElementById("familia-equipo");
-      const statusBox = document.getElementById("status-equipo");
-      const statusDetalle = document.getElementById("status-detalle");
-      const obsBox = document.getElementById("observaciones-equipo");
-
-      if (!id) {
-        alert("Por favor ingrese un número de equipo");
-        return;
-      }
-
-      limpiarResultados();
-      mostrarOverlay(true);
-
-      let mensajeIndex = 0;
-      const statusMensaje = document.getElementById("status-mensaje");
-      statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
-      
-      const mensajeInterval = setInterval(() => {
-        mensajeIndex = (mensajeIndex + 1) % MENSAJES_CARGA.length;
-        statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
-      }, INTERVALO_MENSAJES);
+    async function consultarEstado(){
+      const id = document.getElementById('numero-equipo').value.trim();
+      if(!id){ alert('Ingrese ID'); return; }
+      document.getElementById('overlay').style.display='flex';
+      let idx=0,sm=document.getElementById('status-mensaje');
+      sm.innerText=MENSAJES_CARGA[idx];
+      const mi=setInterval(()=>{ idx=(idx+1)%MENSAJES_CARGA.length; sm.innerText=MENSAJES_CARGA[idx]; },INTERVALO_MENSAJES);
 
       try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
-        const data = await response.json();
-
-        clearInterval(mensajeInterval);
-
-        if (data.error) {
-          familiaBox.innerText = "Equipo no encontrado";
-          statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
-          statusDetalle.className = "status-box status-otros";
+        const d = tablaLocal.find(e=>e.ID===id);
+        clearInterval(mi);
+        document.getElementById('overlay').style.display='none';
+        if(!d){
+          document.getElementById('familia-equipo').innerText='No encontrado';
+          document.getElementById('status-equipo').innerText='N/A';
+          const sd=document.getElementById('status-detalle'); sd.innerHTML=''; sd.className='status-box status-otros';
         } else {
-          familiaBox.innerText = data.FAMILIA || "Sin información";
-          
-          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
-          
-          let estadoClass = "status-otros";
-          let icono = "";
-          
-          if (estado === "OPERATIVO") {
-            estadoClass = "status-operativo";
-            icono = "✅ " + estado;
-          } else if (estado === "INOPERATIVO") {
-            estadoClass = "status-inoperativo";
-            icono = "❌ " + estado;
-          } else if (estado === "PREVENTIVO") {
-            estadoClass = "status-preventivo";
-            icono = "🛠️ " + estado;
-          } else if (estado === "FUERA DE OPERACION") {
-            estadoClass = "status-fuera-operacion";
-            icono = "❌ " + estado;
-          } else if (estado === "LAVADO") {
-            estadoClass = "status-lavado";
-            icono = "🚿 " + estado;
-          } else if (estado === "REVISIÓN") {
-            estadoClass = "status-revision";
-            icono = "🔍 " + estado;
-          } else {
-            icono = estado;
-          }
-          
-          statusDetalle.innerHTML = icono;
-          statusDetalle.className = "status-box " + estadoClass;
-          
-          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
+          document.getElementById('familia-equipo').innerText=d.FAMILIA||'';
+          const es=(d['STATUS ✎']||'Desconocido').toUpperCase();
+          document.getElementById('status-equipo').innerText='Estado: '+es;
+          let cl='status-otros',ic=es;
+          if(es==='OPERATIVO'){ cl='status-operativo'; ic='✅ '+es; }
+          else if(es==='INOPERATIVO'){ cl='status-inoperativo'; ic='❌ '+es; }
+          else if(es==='PREVENTIVO'){ cl='status-preventivo'; ic='🛠️ '+es; }
+          else if(es==='FUERA DE OPERACION'){ cl='status-fuera-operacion'; ic='❌ '+es; }
+          else if(es==='LAVADO'){ cl='status-lavado'; ic='🚿 '+es; }
+          else if(es==='REVISIÓN'){ cl='status-revision'; ic='🔍 '+es; }
+          const sd=document.getElementById('status-detalle'); sd.innerHTML=ic; sd.className='status-box '+cl;
+          document.getElementById('observaciones-equipo').innerText=d.OBSERVACIONES||'';
         }
-      } catch (error) {
-        console.error("Error al consultar:", error);
-        statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
-        statusDetalle.className = "status-box status-inoperativo";
-      } finally {
-        clearInterval(mensajeInterval);
-        mostrarOverlay(false);
-      }
+      } catch(e){ console.error(e); clearInterval(mi); document.getElementById('overlay').style.display='none'; }
     }
-
-    function actualizarHojasGoogle() {
-        const refreshBtn = document.getElementById('refresh-btn');
-        const refreshSpinner = document.getElementById('refresh-spinner');
-        const refreshText = document.getElementById('refresh-text');
-        
-        refreshBtn.classList.remove('actualizado');
-        refreshBtn.classList.add('actualizando');
-        refreshSpinner.style.display = 'inline-block';
-        refreshText.textContent = 'Actualizando...';
-        refreshBtn.disabled = true;
-
-        const iframes = document.querySelectorAll('.sheet-container iframe');
-        iframes.forEach(iframe => {
-            const timestamp = new Date().getTime();
-            const newSrc = iframe.src.split('&')[0] + '&timestamp=' + timestamp;
-            iframe.src = newSrc;
-        });
-
-        setTimeout(function() {
-            refreshSpinner.style.display = 'none';
-            refreshBtn.classList.remove('actualizando');
-            refreshBtn.classList.add('actualizado');
-            refreshText.textContent = 'Actualizado ✅';
-            
-            setTimeout(function() {
-                refreshBtn.classList.remove('actualizado');
-                refreshText.textContent = 'Actualizar';
-                refreshBtn.disabled = false;
-            }, 2000);
-        }, 1500);
-    }
-
-    setInterval(actualizarHojasGoogle, 300000);
-
-    document.addEventListener('DOMContentLoaded', function() {
-        if (sessionStorage.getItem('autenticado')) {
-            setTimeout(actualizarHojasGoogle, 1000);
-        }
-    });
-
-    document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        consultarEstado();
-      }
-    });
-
-    document.getElementById("password-input").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        verificarAcceso();
-      }
-    });
-
-    document.addEventListener('click', function(e) {
-      if (e.target.closest('.sheet-container iframe')) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    });
+    document.getElementById('numero-equipo').addEventListener('keypress',e=>{ if(e.key==='Enter')consultarEstado(); });
   </script>
 </body>
 </html>
