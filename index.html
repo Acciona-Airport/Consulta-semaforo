@@ -485,6 +485,7 @@ html
     const INTERVALO_MENSAJES = 4000;
     let datosCompletos = null;
     let intervaloActualizacion = null;
+    let cargandoDatos = false;
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -561,6 +562,7 @@ html
         document.getElementById('main-container').style.display = 'none';
         document.getElementById('blank-container').style.display = 'none';
         document.getElementById('bottom-nav').style.display = 'none';
+        cargarDatosCompletos();
       } else {
         document.getElementById('auth-container').style.display = 'none';
         document.getElementById('main-container').style.display = 'block';
@@ -618,7 +620,6 @@ html
             setTimeout(function() {
               mainContainer.classList.add('active');
               authContainer.style.display = 'none';
-              cargarDatosCompletos();
               iniciarActualizacionAutomatica();
             }, 500);
           }, 1500);
@@ -664,11 +665,16 @@ html
     }
 
     async function cargarDatosCompletos() {
+      if (cargandoDatos) return;
+      cargandoDatos = true;
+      
       try {
         const response = await fetch(URL_GET + "?tipo=completo");
         datosCompletos = await response.json();
       } catch (error) {
         console.error("Error al cargar datos completos:", error);
+      } finally {
+        cargandoDatos = false;
       }
     }
 
@@ -676,6 +682,7 @@ html
       if (intervaloActualizacion) {
         clearInterval(intervaloActualizacion);
       }
+      cargarDatosCompletos();
       intervaloActualizacion = setInterval(cargarDatosCompletos, 60000);
     }
 
@@ -705,8 +712,8 @@ html
         if (datosCompletos) {
           data = datosCompletos.find(item => item.ID === id) || { error: "Equipo no encontrado" };
         } else {
-          const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
-          data = await response.json();
+          await cargarDatosCompletos();
+          data = datosCompletos.find(item => item.ID === id) || { error: "Equipo no encontrado" };
         }
 
         clearInterval(mensajeInterval);
