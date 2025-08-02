@@ -482,6 +482,73 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
+    const CACHE_EXPIRATION = 15 * 60 * 1000; // 15 minutos en milisegundos
+
+    // Variables para control de caché
+    const DB_NAME = 'semaforoCache';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'equipos';
+    let db = null;
+
+    // Inicializar IndexedDB
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+        
+        request.onsuccess = (event) => {
+          db = event.target.result;
+          resolve(db);
+        };
+        
+        request.onerror = (event) => {
+          console.error('Error al abrir IndexedDB:', event.target.error);
+          reject(event.target.error);
+        };
+      });
+    }
+
+    // Guardar datos en caché
+    async function cacheData(id, data) {
+      if (!db) await initDB().catch(() => null);
+      if (!db) return;
+      
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put({ id, data, timestamp: Date.now() });
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => resolve();
+      });
+    }
+
+    // Obtener datos de caché
+    async function getCachedData(id) {
+      if (!db) await initDB().catch(() => null);
+      if (!db) return null;
+      
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.get(id);
+        
+        request.onsuccess = () => {
+          if (request.result && (Date.now() - request.result.timestamp < CACHE_EXPIRATION)) {
+            resolve(request.result.data);
+          } else {
+            resolve(null);
+          }
+        };
+        
+        request.onerror = () => resolve(null);
+      });
+    }
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -553,6 +620,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+      // Inicializar la base de datos
+      initDB().catch(console.error);
+      
       if (!sessionStorage.getItem('autenticado')) {
         document.getElementById('auth-container').style.display = 'block';
         document.getElementById('main-container').style.display = 'none';
@@ -656,21 +726,80 @@
       document.getElementById("observaciones-equipo").innerText = "";
     }
 
-    async function consultarEstado() {
-      const id = document.getElementById("numero-equipo").value.trim();
+    function actualizarUI(data) {
       const familiaBox = document.getElementById("familia-equipo");
       const statusBox = document.getElementById("status-equipo");
       const statusDetalle = document.getElementById("status-detalle");
       const obsBox = document.getElementById("observaciones-equipo");
 
+      if (data.error) {
+        familiaBox.innerText = "Equipo no encontrado";
+        statusBox.innerText = "N/A";
+        statusDetalle.innerText = "El equipo no existe en la base de datos";
+        statusDetalle.className = "status-box status-otros";
+      } else {
+        familiaBox.innerText = data.FAMILIA || "Sin información";
+        
+        const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
+        statusBox.innerText = "Estado: " + estado;
+        
+        let estadoClass = "status-otros";
+        let icono = "";
+        
+        if (estado === "OPERATIVO") {
+          estadoClass = "status-operativo";
+          icono = "✅ " + estado;
+        } else if (estado === "INOPERATIVO") {
+          estadoClass = "status-inoperativo";
+          icono = "❌ " + estado;
+        } else if (estado === "PREVENTIVO") {
+          estadoClass = "status-preventivo";
+          icono = "🛠️ " + estado;
+        } else if (estado === "FUERA DE OPERACION") {
+          estadoClass = "status-fuera-operacion";
+          icono = "❌ " + estado;
+        } else if (estado === "LAVADO") {
+          estadoClass = "status-lavado";
+          icono = "🚿 " + estado;
+        } else if (estado === "REVISIÓN") {
+          estadoClass = "status-revision";
+          icono = "🔍 " + estado;
+        } else {
+          icono = estado;
+        }
+        
+        statusDetalle.innerHTML = icono;
+        statusDetalle.className = "status-box " + estadoClass;
+        
+        obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
+      }
+    }
+
+    async function consultarEstado() {
+      const id = document.getElementById("numero-equipo").value.trim();
+      
       if (!id) {
         alert("Por favor ingrese un número de equipo");
         return;
       }
 
       limpiarResultados();
-      mostrarOverlay(true);
+      
+      // Intentar obtener datos del caché primero
+      const cachedData = await getCachedData(id);
+      if (cachedData) {
+        actualizarUI(cachedData);
+        // Actualizar en segundo plano
+        setTimeout(() => fetchAndUpdate(id), 0);
+        return;
+      }
 
+      // Si no hay caché válida, hacer la petición normal
+      mostrarOverlay(true);
+      await fetchAndUpdate(id);
+    }
+
+    async function fetchAndUpdate(id) {
       let mensajeIndex = 0;
       const statusMensaje = document.getElementById("status-mensaje");
       statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
@@ -681,56 +810,33 @@
       }, INTERVALO_MENSAJES);
 
       try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
+        // Usar AbortController para timeout
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+        
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id), {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeout);
+        
         const data = await response.json();
-
         clearInterval(mensajeInterval);
 
-        if (data.error) {
-          familiaBox.innerText = "Equipo no encontrado";
-          statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
-          statusDetalle.className = "status-box status-otros";
-        } else {
-          familiaBox.innerText = data.FAMILIA || "Sin información";
-          
-          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
-          
-          let estadoClass = "status-otros";
-          let icono = "";
-          
-          if (estado === "OPERATIVO") {
-            estadoClass = "status-operativo";
-            icono = "✅ " + estado;
-          } else if (estado === "INOPERATIVO") {
-            estadoClass = "status-inoperativo";
-            icono = "❌ " + estado;
-          } else if (estado === "PREVENTIVO") {
-            estadoClass = "status-preventivo";
-            icono = "🛠️ " + estado;
-          } else if (estado === "FUERA DE OPERACION") {
-            estadoClass = "status-fuera-operacion";
-            icono = "❌ " + estado;
-          } else if (estado === "LAVADO") {
-            estadoClass = "status-lavado";
-            icono = "🚿 " + estado;
-          } else if (estado === "REVISIÓN") {
-            estadoClass = "status-revision";
-            icono = "🔍 " + estado;
-          } else {
-            icono = estado;
-          }
-          
-          statusDetalle.innerHTML = icono;
-          statusDetalle.className = "status-box " + estadoClass;
-          
-          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
-        }
+        // Guardar en caché
+        await cacheData(id, data);
+        
+        // Actualizar la UI
+        actualizarUI(data);
       } catch (error) {
         console.error("Error al consultar:", error);
+        const statusBox = document.getElementById("status-equipo");
+        const statusDetalle = document.getElementById("status-detalle");
+        
         statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        statusDetalle.innerText = error.name === "AbortError" 
+          ? "Tiempo de espera agotado. Intente nuevamente." 
+          : "Ocurrió un error al consultar el estado";
         statusDetalle.className = "status-box status-inoperativo";
       } finally {
         clearInterval(mensajeInterval);
