@@ -484,7 +484,7 @@
     const INTERVALO_MENSAJES = 4000;
     let equiposCache = {};
     let ultimaActualizacion = null;
-    const CACHE_DURACION = 300000;
+    const CACHE_DURACION = 60000; // 1 minuto
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -570,6 +570,9 @@
           document.getElementById('main-container').classList.add('active');
         }, 50);
         cargarTodosEquipos();
+        
+        // Iniciar actualización silenciosa cada minuto
+        setInterval(cargarTodosEquiposSilencioso, 60000);
       }
     });
 
@@ -618,6 +621,9 @@
               mainContainer.classList.add('active');
               authContainer.style.display = 'none';
               cargarTodosEquipos();
+              
+              // Iniciar actualización silenciosa cada minuto
+              setInterval(cargarTodosEquiposSilencioso, 60000);
             }, 500);
           }, 1500);
         } else {
@@ -661,6 +667,30 @@
       document.getElementById("observaciones-equipo").innerText = "";
     }
 
+    async function cargarTodosEquiposSilencioso() {
+      try {
+        const response = await fetch(URL_GET + "?tipo=todos");
+        
+        if (!response.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+        
+        const data = await response.json();
+        
+        if (data && Array.isArray(data)) {
+          equiposCache = {};
+          data.forEach(equipo => {
+            if (equipo && equipo.ID !== undefined) {
+              equiposCache[equipo.ID.toString()] = equipo;
+            }
+          });
+          ultimaActualizacion = new Date();
+        }
+      } catch (error) {
+        console.error("Error silencioso al cargar equipos:", error);
+      }
+    }
+
     async function cargarTodosEquipos() {
       try {
         mostrarOverlay(true);
@@ -685,7 +715,6 @@
         }
       } catch (error) {
         console.error("Error al cargar equipos:", error);
-        setTimeout(cargarTodosEquipos, 30000);
       } finally {
         mostrarOverlay(false);
       }
@@ -827,8 +856,6 @@
           }, 2000);
       }, 1500);
     }
-
-    setInterval(actualizarHojasGoogle, 300000);
 
     document.addEventListener('DOMContentLoaded', function() {
         if (sessionStorage.getItem('autenticado')) {
