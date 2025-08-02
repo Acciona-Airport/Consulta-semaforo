@@ -378,9 +378,6 @@
       margin-right: 8px;
       vertical-align: middle;
     }
-    #data-table {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -476,21 +473,6 @@
     </div>
   </nav>
 
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>FAMILIA</th>
-        <th>MARCA EQUIPO</th>
-        <th>MODELO EQUIPO</th>
-        <th>STATUS ✎</th>
-        <th>OBSERVACIONES</th>
-      </tr>
-    </thead>
-    <tbody id="data-table-body">
-    </tbody>
-  </table>
-
   <script>
     const URL_GET = "https://script.google.com/macros/s/AKfycbx5RL_GDtFwsKcMWyBYLwi2sdXtnkh9eXzdVs73jTS6zt3oAu9dmQwSeiyx43Tkt_QfeQ/exec";
     const MENSAJES_CARGA = [
@@ -500,7 +482,6 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    let equiposData = [];
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -585,7 +566,6 @@
         setTimeout(() => {
           document.getElementById('main-container').classList.add('active');
         }, 50);
-        cargarDatosEquipos();
       }
     });
 
@@ -633,7 +613,6 @@
             setTimeout(function() {
               mainContainer.classList.add('active');
               authContainer.style.display = 'none';
-              cargarDatosEquipos();
             }, 500);
           }, 1500);
         } else {
@@ -677,42 +656,7 @@
       document.getElementById("observaciones-equipo").innerText = "";
     }
 
-    async function cargarDatosEquipos() {
-      try {
-        mostrarOverlay(true);
-        const response = await fetch(URL_GET + "?tipo=todos");
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-          equiposData = data;
-          actualizarTablaDatos(data);
-        }
-      } catch (error) {
-        console.error("Error al cargar datos de equipos:", error);
-      } finally {
-        mostrarOverlay(false);
-      }
-    }
-
-    function actualizarTablaDatos(data) {
-      const tbody = document.getElementById('data-table-body');
-      tbody.innerHTML = '';
-      
-      data.forEach(equipo => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${equipo.ID || ''}</td>
-          <td>${equipo.FAMILIA || ''}</td>
-          <td>${equipo['MARCA EQUIPO'] || ''}</td>
-          <td>${equipo['MODELO EQUIPO'] || ''}</td>
-          <td>${equipo['STATUS ✎'] || ''}</td>
-          <td>${equipo.OBSERVACIONES || ''}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function consultarEstado() {
+    async function consultarEstado() {
       const id = document.getElementById("numero-equipo").value.trim();
       const familiaBox = document.getElementById("familia-equipo");
       const statusBox = document.getElementById("status-equipo");
@@ -736,20 +680,21 @@
         statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
       }, INTERVALO_MENSAJES);
 
-      setTimeout(() => {
+      try {
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
+        const data = await response.json();
+
         clearInterval(mensajeInterval);
-        
-        const equipoEncontrado = equiposData.find(equipo => equipo.ID == id);
-        
-        if (!equipoEncontrado) {
+
+        if (data.error) {
           familiaBox.innerText = "Equipo no encontrado";
           statusBox.innerText = "N/A";
           statusDetalle.innerText = "El equipo no existe en la base de datos";
           statusDetalle.className = "status-box status-otros";
         } else {
-          familiaBox.innerText = equipoEncontrado.FAMILIA || "Sin información";
+          familiaBox.innerText = data.FAMILIA || "Sin información";
           
-          const estado = (equipoEncontrado["STATUS ✎"] || "Desconocido").toUpperCase();
+          const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
           statusBox.innerText = "Estado: " + estado;
           
           let estadoClass = "status-otros";
@@ -780,48 +725,52 @@
           statusDetalle.innerHTML = icono;
           statusDetalle.className = "status-box " + estadoClass;
           
-          obsBox.innerText = equipoEncontrado.OBSERVACIONES || "Sin observaciones";
+          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
-        
+      } catch (error) {
+        console.error("Error al consultar:", error);
+        statusBox.innerText = "Error";
+        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        statusDetalle.className = "status-box status-inoperativo";
+      } finally {
+        clearInterval(mensajeInterval);
         mostrarOverlay(false);
-      }, 1000);
+      }
     }
 
     function actualizarHojasGoogle() {
-      const refreshBtn = document.getElementById('refresh-btn');
-      const refreshSpinner = document.getElementById('refresh-spinner');
-      const refreshText = document.getElementById('refresh-text');
-      
-      refreshBtn.classList.remove('actualizado');
-      refreshBtn.classList.add('actualizando');
-      refreshSpinner.style.display = 'inline-block';
-      refreshText.textContent = 'Actualizando...';
-      refreshBtn.disabled = true;
+        const refreshBtn = document.getElementById('refresh-btn');
+        const refreshSpinner = document.getElementById('refresh-spinner');
+        const refreshText = document.getElementById('refresh-text');
+        
+        refreshBtn.classList.remove('actualizado');
+        refreshBtn.classList.add('actualizando');
+        refreshSpinner.style.display = 'inline-block';
+        refreshText.textContent = 'Actualizando...';
+        refreshBtn.disabled = true;
 
-      cargarDatosEquipos();
+        const iframes = document.querySelectorAll('.sheet-container iframe');
+        iframes.forEach(iframe => {
+            const timestamp = new Date().getTime();
+            const newSrc = iframe.src.split('&')[0] + '&timestamp=' + timestamp;
+            iframe.src = newSrc;
+        });
 
-      const iframes = document.querySelectorAll('.sheet-container iframe');
-      iframes.forEach(iframe => {
-          const timestamp = new Date().getTime();
-          const newSrc = iframe.src.split('&')[0] + '&timestamp=' + timestamp;
-          iframe.src = newSrc;
-      });
-
-      setTimeout(function() {
-          refreshSpinner.style.display = 'none';
-          refreshBtn.classList.remove('actualizando');
-          refreshBtn.classList.add('actualizado');
-          refreshText.textContent = 'Actualizado ✅';
-          
-          setTimeout(function() {
-              refreshBtn.classList.remove('actualizado');
-              refreshText.textContent = 'Actualizar';
-              refreshBtn.disabled = false;
-          }, 2000);
-      }, 1500);
+        setTimeout(function() {
+            refreshSpinner.style.display = 'none';
+            refreshBtn.classList.remove('actualizando');
+            refreshBtn.classList.add('actualizado');
+            refreshText.textContent = 'Actualizado ✅';
+            
+            setTimeout(function() {
+                refreshBtn.classList.remove('actualizado');
+                refreshText.textContent = 'Actualizar';
+                refreshBtn.disabled = false;
+            }, 2000);
+        }, 1500);
     }
 
-    setInterval(actualizarHojasGoogle, 60000);
+    setInterval(actualizarHojasGoogle, 300000);
 
     document.addEventListener('DOMContentLoaded', function() {
         if (sessionStorage.getItem('autenticado')) {
