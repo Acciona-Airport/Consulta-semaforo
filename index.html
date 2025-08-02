@@ -704,10 +704,10 @@
             let estadoClass = "status-otros";
             let icono = "";
             
-            if (estado.includes("OPERATIVO")) {
+            if (estado === "OPERATIVO") {
               estadoClass = "status-operativo";
               icono = "✅ " + estado;
-            } else if (estado.includes("INOPERATIVO")) {
+            } else if (estado === "INOPERATIVO") {
               estadoClass = "status-inoperativo";
               icono = "❌ " + estado;
             } else if (estado.includes("PREVENTIVO")) {
