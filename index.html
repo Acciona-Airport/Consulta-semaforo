@@ -378,6 +378,17 @@
       margin-right: 8px;
       vertical-align: middle;
     }
+    .performance-info {
+      position: fixed;
+      bottom: 60px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body>
@@ -458,6 +469,8 @@
     <span id="refresh-text">Actualizar</span>
   </button>
 
+  <div id="performance-info" class="performance-info" style="display: none;"></div>
+
   <nav class="bottom-nav" id="bottom-nav" style="display: none;">
     <div class="nav-item active" onclick="mostrarPantalla('main-container')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -482,25 +495,80 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
+    const CACHE_DURACION = 300000; // 5 minutos en milisegundos
     let equiposCache = {};
     let ultimaActualizacion = null;
-    const CACHE_DURACION = 60000; // 1 minuto
+    let abortController = null;
+    let performanceData = {
+      lastRequestTime: 0,
+      averageTime: 0,
+      requestCount: 0
+    };
 
-    function alternarLogos() {
-      const logoAcciona = document.getElementById('logo-acciona');
-      const logoSemaforo = document.getElementById('logo-semaforo');
-      
-      if (logoAcciona.style.opacity === '1' || logoAcciona.style.opacity === '') {
-        logoAcciona.style.opacity = '0';
-        logoSemaforo.style.opacity = '1';
-      } else {
-        logoAcciona.style.opacity = '1';
-        logoSemaforo.style.opacity = '0';
-      }
+    // Función para alternar visibilidad de contraseña
+    function togglePassword() {
+      const passwordInput = document.getElementById('password-input');
+      passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
     }
 
-    setInterval(alternarLogos, 3000);
+    // Función para verificar acceso
+    function verificarAcceso() {
+      const passwordInput = document.getElementById('password-input');
+      const errorAuth = document.getElementById('error-auth');
+      const authLoader = document.getElementById('auth-loader');
+      const authMessage = document.getElementById('auth-message');
+      const authButton = document.getElementById('auth-button');
+      
+      errorAuth.style.display = 'none';
+      authMessage.style.display = 'none';
+      authLoader.style.display = 'block';
+      authButton.style.display = 'none';
+      
+      setTimeout(() => {
+        authLoader.style.display = 'none';
+        
+        const contrasenasValidas = obtenerContrasenas();
+        const inputValor = passwordInput.value;
+        let accesoPermitido = false;
+        
+        for (let i = 0; i < contrasenasValidas.length; i++) {
+          if (inputValor === contrasenasValidas[i]) {
+            accesoPermitido = true;
+            break;
+          }
+        }
+        
+        if (accesoPermitido) {
+          authMessage.textContent = "✅ Acceso validado.";
+          authMessage.className = "auth-message auth-success";
+          authMessage.style.display = 'block';
+          
+          setTimeout(() => {
+            sessionStorage.setItem('autenticado', 'true');
+            document.getElementById('auth-container').classList.add('hide');
+            document.getElementById('main-container').style.display = 'block';
+            document.getElementById('bottom-nav').style.display = 'flex';
+            
+            setTimeout(() => {
+              document.getElementById('main-container').classList.add('active');
+              document.getElementById('auth-container').style.display = 'none';
+              cargarTodosEquipos();
+              setInterval(cargarTodosEquiposSilencioso, 60000);
+            }, 500);
+          }, 1500);
+        } else {
+          authMessage.textContent = "❌ Acceso denegado.";
+          authMessage.className = "auth-message auth-error";
+          authMessage.style.display = 'block';
+          errorAuth.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+          authButton.style.display = 'block';
+        }
+      }, 1500);
+    }
 
+    // Función para obtener contraseñas válidas (ofuscadas)
     function obtenerContrasenas() {
       return [
         String.fromCharCode(74,101,102,101,115,100,101,112,101,113,50,48,50,53),  
@@ -514,15 +582,7 @@
       ];
     }
 
-    function togglePassword() {
-      const passwordInput = document.getElementById('password-input');
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-      } else {
-        passwordInput.type = 'password';
-      }
-    }
-
+    // Función para mostrar/ocultar pantallas
     function mostrarPantalla(idPantalla) {
       const pantallas = document.querySelectorAll('.container, .blank-container');
       pantallas.forEach(pantalla => {
@@ -542,123 +602,30 @@
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(item => {
         item.classList.remove('active');
-        if (item.textContent.includes(idPantalla === 'main-container' ? 'Inicio' : 'Semaforo')) {
+        if (item.textContent.includes(idPantalla === 'main-container' ? 'Buscador' : 'Semaforo')) {
           item.classList.add('active');
         }
       });
 
       const refreshBtn = document.getElementById('refresh-btn');
-      if (idPantalla === 'blank-container') {
-        refreshBtn.style.display = 'block';
-      } else {
-        refreshBtn.style.display = 'none';
-      }
+      refreshBtn.style.display = idPantalla === 'blank-container' ? 'block' : 'none';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      if (!sessionStorage.getItem('autenticado')) {
-        document.getElementById('auth-container').style.display = 'block';
-        document.getElementById('main-container').style.display = 'none';
-        document.getElementById('blank-container').style.display = 'none';
-        document.getElementById('bottom-nav').style.display = 'none';
-      } else {
-        document.getElementById('auth-container').style.display = 'none';
-        document.getElementById('main-container').style.display = 'block';
-        document.getElementById('blank-container').style.display = 'none';
-        document.getElementById('bottom-nav').style.display = 'flex';
-        setTimeout(() => {
-          document.getElementById('main-container').classList.add('active');
-        }, 50);
-        cargarTodosEquipos();
-        
-        // Iniciar actualización silenciosa cada minuto
-        setInterval(cargarTodosEquiposSilencioso, 60000);
-      }
-    });
-
-    function verificarAcceso() {
-      const passwordInput = document.getElementById('password-input');
-      const errorAuth = document.getElementById('error-auth');
-      const authLoader = document.getElementById('auth-loader');
-      const authMessage = document.getElementById('auth-message');
-      const authButton = document.getElementById('auth-button');
-      const authContainer = document.getElementById('auth-container');
-      const mainContainer = document.getElementById('main-container');
-      const bottomNav = document.getElementById('bottom-nav');
-      
-      errorAuth.style.display = 'none';
-      authMessage.style.display = 'none';
-      
-      authLoader.style.display = 'block';
-      authButton.style.display = 'none';
-      
-      setTimeout(function() {
-        authLoader.style.display = 'none';
-        
-        const contrasenasValidas = obtenerContrasenas();
-        const inputValor = passwordInput.value;
-        let accesoPermitido = false;
-        
-        for (let i = 0; i < contrasenasValidas.length; i++) {
-          if (inputValor === contrasenasValidas[i]) {
-            accesoPermitido = true;
-            break;
-          }
-        }
-        
-        if (accesoPermitido) {
-          authMessage.textContent = "✅ Acceso validado.";
-          authMessage.className = "auth-message auth-success";
-          authMessage.style.display = 'block';
-          
-          setTimeout(function() {
-            sessionStorage.setItem('autenticado', 'true');
-            authContainer.classList.add('hide');
-            mainContainer.style.display = 'block';
-            bottomNav.style.display = 'flex';
-            
-            setTimeout(function() {
-              mainContainer.classList.add('active');
-              authContainer.style.display = 'none';
-              cargarTodosEquipos();
-              
-              // Iniciar actualización silenciosa cada minuto
-              setInterval(cargarTodosEquiposSilencioso, 60000);
-            }, 500);
-          }, 1500);
-        } else {
-          authMessage.textContent = "❌ Acceso denegado.";
-          authMessage.className = "auth-message auth-error";
-          authMessage.style.display = 'block';
-          errorAuth.style.display = 'block';
-          passwordInput.value = '';
-          passwordInput.focus();
-          authButton.style.display = 'block';
-        }
-      }, 1500);
-    }
-
+    // Función para actualizar fecha y hora
     function actualizarFechaHora() {
       const now = new Date();
       const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
       const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      const diaSemana = dias[now.getDay()];
-      const dia = now.getDate();
-      const mes = meses[now.getMonth()];
-      const anio = now.getFullYear();
-      const hora = String(now.getHours()).padStart(2, '0');
-      const minutos = String(now.getMinutes()).padStart(2, '0');
-      const segundos = String(now.getSeconds()).padStart(2, '0');
-      const fechaFormateada = `${diaSemana}, ${dia} de ${mes} de ${anio}, ${hora}:${minutos}:${segundos}`;
+      const fechaFormateada = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
       document.getElementById("datetime").innerText = fechaFormateada;
     }
-    setInterval(actualizarFechaHora, 1000);
-    actualizarFechaHora();
 
+    // Función para mostrar/ocultar overlay de carga
     function mostrarOverlay(mostrar) {
       document.getElementById("overlay").style.display = mostrar ? "flex" : "none";
     }
 
+    // Función para limpiar resultados
     function limpiarResultados() {
       document.getElementById("familia-equipo").innerText = "";
       document.getElementById("status-equipo").innerText = "";
@@ -667,49 +634,51 @@
       document.getElementById("observaciones-equipo").innerText = "";
     }
 
+    // Función para cargar todos los equipos (silencioso)
     async function cargarTodosEquiposSilencioso() {
       try {
+        const startTime = Date.now();
         const response = await fetch(URL_GET + "?tipo=todos");
         
-        if (!response.ok) {
-          throw new Error('Error en la respuesta del servidor');
-        }
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
         
         const data = await response.json();
         
-        if (data && Array.isArray(data)) {
+        if (data && Array.isArray(data.equipos)) {
           equiposCache = {};
-          data.forEach(equipo => {
+          data.equipos.forEach(equipo => {
             if (equipo && equipo.ID !== undefined) {
               equiposCache[equipo.ID.toString()] = equipo;
             }
           });
           ultimaActualizacion = new Date();
+          updatePerformanceInfo(Date.now() - startTime);
         }
       } catch (error) {
         console.error("Error silencioso al cargar equipos:", error);
       }
     }
 
+    // Función para cargar todos los equipos
     async function cargarTodosEquipos() {
       try {
         mostrarOverlay(true);
+        const startTime = Date.now();
         const response = await fetch(URL_GET + "?tipo=todos");
         
-        if (!response.ok) {
-          throw new Error('Error en la respuesta del servidor');
-        }
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
         
         const data = await response.json();
         
-        if (data && Array.isArray(data)) {
+        if (data && Array.isArray(data.equipos)) {
           equiposCache = {};
-          data.forEach(equipo => {
+          data.equipos.forEach(equipo => {
             if (equipo && equipo.ID !== undefined) {
               equiposCache[equipo.ID.toString()] = equipo;
             }
           });
           ultimaActualizacion = new Date();
+          updatePerformanceInfo(Date.now() - startTime);
         } else {
           throw new Error('Formato de datos incorrecto');
         }
@@ -720,6 +689,7 @@
       }
     }
 
+    // Función principal para consultar estado
     async function consultarEstado() {
       const id = document.getElementById("numero-equipo").value.trim();
       
@@ -728,59 +698,70 @@
         return;
       }
 
+      // Cancelar solicitud anterior si existe
+      if (abortController) {
+        abortController.abort();
+      }
+      abortController = new AbortController();
+
       limpiarResultados();
       mostrarOverlay(true);
+      const startTime = Date.now();
 
-      const ahora = new Date();
-      if (Object.keys(equiposCache).length === 0 || 
-          (ultimaActualizacion && (ahora - ultimaActualizacion) > CACHE_DURACION)) {
-        await cargarTodosEquipos();
-      }
-
-      let mensajeIndex = 0;
-      const statusMensaje = document.getElementById("status-mensaje");
-      statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
-      
-      const mensajeInterval = setInterval(() => {
-        mensajeIndex = (mensajeIndex + 1) % MENSAJES_CARGA.length;
-        statusMensaje.textContent = MENSAJES_CARGA[mensajeIndex];
-      }, INTERVALO_MENSAJES);
-
-      setTimeout(() => {
-        clearInterval(mensajeInterval);
+      try {
+        let equipoEncontrado = equiposCache[id];
         
-        const equipoEncontrado = equiposCache[id] || 
-          Object.values(equiposCache).find(e => 
-            e.ID.toString().toLowerCase().includes(id.toLowerCase())
-          );
+        // Si no está en caché o la caché está expirada
+        const ahora = new Date();
+        if (!equipoEncontrado || (ultimaActualizacion && (ahora - ultimaActualizacion) > CACHE_DURACION)) {
+          await cargarTodosEquipos();
+          equipoEncontrado = equiposCache[id];
+        }
 
         if (equipoEncontrado) {
           mostrarResultadoEquipo(equipoEncontrado);
+          updatePerformanceInfo(Date.now() - startTime);
         } else {
-          buscarEquipoEnServidor(id);
+          await buscarEquipoEnServidor(id, startTime);
         }
-        
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error("Error en consultarEstado:", error);
+          mostrarEquipoNoEncontrado();
+        }
+      } finally {
         mostrarOverlay(false);
-      }, 100);
+        abortController = null;
+      }
     }
 
-    async function buscarEquipoEnServidor(id) {
+    // Función para buscar equipo en el servidor
+    async function buscarEquipoEnServidor(id, startTime) {
       try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id), {
+          signal: abortController.signal
+        });
+        
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        
         const data = await response.json();
 
-        if (data.error) {
+        if (data.error || !data.ID) {
           mostrarEquipoNoEncontrado();
         } else {
           equiposCache[data.ID] = data;
           mostrarResultadoEquipo(data);
+          updatePerformanceInfo(Date.now() - startTime);
         }
       } catch (error) {
-        console.error("Error al buscar equipo:", error);
-        mostrarEquipoNoEncontrado();
+        if (error.name !== 'AbortError') {
+          console.error("Error al buscar equipo:", error);
+          mostrarEquipoNoEncontrado();
+        }
       }
     }
 
+    // Función para mostrar equipo no encontrado
     function mostrarEquipoNoEncontrado() {
       document.getElementById("familia-equipo").innerText = "Equipo no encontrado";
       document.getElementById("status-equipo").innerText = "N/A";
@@ -789,6 +770,7 @@
       document.getElementById("observaciones-equipo").innerText = "";
     }
 
+    // Función para mostrar resultados del equipo
     function mostrarResultadoEquipo(equipo) {
       const estado = (equipo["STATUS ✎"] || "Desconocido").toUpperCase();
       let estadoClass = "status-otros";
@@ -823,6 +805,7 @@
       document.getElementById("observaciones-equipo").innerText = equipo.OBSERVACIONES || "Sin observaciones";
     }
 
+    // Función para actualizar hojas de Google
     function actualizarHojasGoogle() {
       const refreshBtn = document.getElementById('refresh-btn');
       const refreshSpinner = document.getElementById('refresh-spinner');
@@ -843,13 +826,13 @@
           iframe.src = newSrc;
       });
 
-      setTimeout(function() {
+      setTimeout(() => {
           refreshSpinner.style.display = 'none';
           refreshBtn.classList.remove('actualizando');
           refreshBtn.classList.add('actualizado');
           refreshText.textContent = 'Actualizado ✅';
           
-          setTimeout(function() {
+          setTimeout(() => {
               refreshBtn.classList.remove('actualizado');
               refreshText.textContent = 'Actualizar';
               refreshBtn.disabled = false;
@@ -857,30 +840,71 @@
       }, 1500);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (sessionStorage.getItem('autenticado')) {
-            setTimeout(actualizarHojasGoogle, 1000);
-        }
-    });
+    // Función para actualizar información de rendimiento
+    function updatePerformanceInfo(time) {
+      performanceData.lastRequestTime = time;
+      performanceData.requestCount++;
+      performanceData.averageTime = 
+        ((performanceData.averageTime * (performanceData.requestCount - 1)) + time) / performanceData.requestCount;
+      
+      const perfInfo = document.getElementById('performance-info');
+      perfInfo.style.display = 'block';
+      perfInfo.innerHTML = `
+        Última consulta: ${time}ms<br>
+        Promedio: ${Math.round(performanceData.averageTime)}ms<br>
+        Consultas: ${performanceData.requestCount}
+      `;
+      
+      setTimeout(() => {
+        perfInfo.style.display = 'none';
+      }, 3000);
+    }
 
-    document.getElementById("numero-equipo").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        consultarEstado();
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!sessionStorage.getItem('autenticado')) {
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('blank-container').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'none';
+      } else {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+        document.getElementById('blank-container').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'flex';
+        setTimeout(() => {
+          document.getElementById('main-container').classList.add('active');
+        }, 50);
+        cargarTodosEquipos();
+        setInterval(cargarTodosEquiposSilencioso, 60000);
       }
+      
+      setInterval(actualizarFechaHora, 1000);
+      actualizarFechaHora();
     });
 
-    document.getElementById("password-input").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        verificarAcceso();
-      }
+    document.getElementById("numero-equipo").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") consultarEstado();
     });
 
-    document.addEventListener('click', function(e) {
+    document.getElementById("password-input").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") verificarAcceso();
+    });
+
+    document.addEventListener('click', (e) => {
       if (e.target.closest('.sheet-container iframe')) {
         e.preventDefault();
         e.stopPropagation();
       }
     });
+
+    // Alternar logos cada 3 segundos
+    setInterval(() => {
+      const logoAcciona = document.getElementById('logo-acciona');
+      const logoSemaforo = document.getElementById('logo-semaforo');
+      logoAcciona.style.opacity = logoAcciona.style.opacity === '1' || logoAcciona.style.opacity === '' ? '0' : '1';
+      logoSemaforo.style.opacity = logoSemaforo.style.opacity === '1' ? '0' : '1';
+    }, 3000);
   </script>
 </body>
 </html>
