@@ -484,7 +484,7 @@
     const INTERVALO_MENSAJES = 4000;
     let equiposCache = {};
     let ultimaActualizacion = null;
-    const CACHE_DURACION = 300000; // 5 minutos en milisegundos
+    const CACHE_DURACION = 300000;
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -667,7 +667,7 @@
         const response = await fetch(URL_GET + "?tipo=todos");
         
         if (!response.ok) {
-          throw new Error('Error al cargar datos');
+          throw new Error('Error en la respuesta del servidor');
         }
         
         const data = await response.json();
@@ -675,17 +675,16 @@
         if (data && Array.isArray(data)) {
           equiposCache = {};
           data.forEach(equipo => {
-            if (equipo.ID) {
-              equiposCache[equipo.ID] = equipo;
+            if (equipo && equipo.ID !== undefined) {
+              equiposCache[equipo.ID.toString()] = equipo;
             }
           });
           ultimaActualizacion = new Date();
-          console.log('Datos cargados:', Object.keys(equiposCache).length, 'equipos');
         } else {
           throw new Error('Formato de datos incorrecto');
         }
       } catch (error) {
-        console.error("Error al cargar datos de equipos:", error);
+        console.error("Error al cargar equipos:", error);
         setTimeout(cargarTodosEquipos, 30000);
       } finally {
         mostrarOverlay(false);
@@ -703,7 +702,6 @@
       limpiarResultados();
       mostrarOverlay(true);
 
-      // Verificar si el caché está vacío o expirado
       const ahora = new Date();
       if (Object.keys(equiposCache).length === 0 || 
           (ultimaActualizacion && (ahora - ultimaActualizacion) > CACHE_DURACION)) {
@@ -722,9 +720,10 @@
       setTimeout(() => {
         clearInterval(mensajeInterval);
         
-        // Buscar en caché primero
         const equipoEncontrado = equiposCache[id] || 
-          Object.values(equiposCache).find(e => e.ID.toString().includes(id));
+          Object.values(equiposCache).find(e => 
+            e.ID.toString().toLowerCase().includes(id.toLowerCase())
+          );
 
         if (equipoEncontrado) {
           mostrarResultadoEquipo(equipoEncontrado);
@@ -744,7 +743,6 @@
         if (data.error) {
           mostrarEquipoNoEncontrado();
         } else {
-          // Actualizar caché con el nuevo equipo
           equiposCache[data.ID] = data;
           mostrarResultadoEquipo(data);
         }
@@ -807,7 +805,6 @@
       refreshText.textContent = 'Actualizando...';
       refreshBtn.disabled = true;
 
-      // Actualizar caché
       cargarTodosEquipos();
 
       const iframes = document.querySelectorAll('.sheet-container iframe');
