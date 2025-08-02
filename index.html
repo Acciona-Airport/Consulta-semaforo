@@ -658,11 +658,7 @@
 
     async function consultarEstado() {
       const id = document.getElementById("numero-equipo").value.trim();
-      const familiaBox = document.getElementById("familia-equipo");
-      const statusBox = document.getElementById("status-equipo");
-      const statusDetalle = document.getElementById("status-detalle");
-      const obsBox = document.getElementById("observaciones-equipo");
-
+      
       if (!id) {
         alert("Por favor ingrese un número de equipo");
         return;
@@ -681,57 +677,56 @@
       }, INTERVALO_MENSAJES);
 
       try {
-        const response = await fetch(URL_GET + "&tipo=equipo&id=" + encodeURIComponent(id));
+        const response = await fetch(URL_GET + "&id=" + encodeURIComponent(id));
         const data = await response.json();
 
         clearInterval(mensajeInterval);
 
         if (data.error) {
-          familiaBox.innerText = "Equipo no encontrado";
-          statusBox.innerText = "N/A";
-          statusDetalle.innerText = "El equipo no existe en la base de datos";
-          statusDetalle.className = "status-box status-otros";
+          document.getElementById("familia-equipo").innerText = "Equipo no encontrado";
+          document.getElementById("status-equipo").innerText = "N/A";
+          document.getElementById("status-detalle").innerText = "El equipo no existe en la base de datos";
+          document.getElementById("status-detalle").className = "status-box status-otros";
         } else {
-          familiaBox.innerText = data.FAMILIA || "Sin información";
+          document.getElementById("familia-equipo").innerText = data.FAMILIA || "Sin información";
           
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          statusBox.innerText = "Estado: " + estado;
+          document.getElementById("status-equipo").innerText = "Estado: " + estado;
           
           let estadoClass = "status-otros";
           let icono = "";
           
-          if (estado === "OPERATIVO") {
+          if (estado.includes("OPERATIVO")) {
             estadoClass = "status-operativo";
             icono = "✅ " + estado;
-          } else if (estado === "INOPERATIVO") {
+          } else if (estado.includes("INOPERATIVO")) {
             estadoClass = "status-inoperativo";
             icono = "❌ " + estado;
-          } else if (estado === "PREVENTIVO") {
+          } else if (estado.includes("PREVENTIVO")) {
             estadoClass = "status-preventivo";
             icono = "🛠️ " + estado;
-          } else if (estado === "FUERA DE OPERACION") {
+          } else if (estado.includes("FUERA DE OPERACION")) {
             estadoClass = "status-fuera-operacion";
             icono = "❌ " + estado;
-          } else if (estado === "LAVADO") {
+          } else if (estado.includes("LAVADO")) {
             estadoClass = "status-lavado";
             icono = "🚿 " + estado;
-          } else if (estado === "REVISIÓN") {
+          } else if (estado.includes("REVISIÓN") || estado.includes("REVISION")) {
             estadoClass = "status-revision";
             icono = "🔍 " + estado;
           } else {
             icono = estado;
           }
           
-          statusDetalle.innerHTML = icono;
-          statusDetalle.className = "status-box " + estadoClass;
-          
-          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
+          document.getElementById("status-detalle").innerHTML = icono;
+          document.getElementById("status-detalle").className = "status-box " + estadoClass;
+          document.getElementById("observaciones-equipo").innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
         console.error("Error al consultar:", error);
-        statusBox.innerText = "Error";
-        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
-        statusDetalle.className = "status-box status-inoperativo";
+        document.getElementById("status-equipo").innerText = "Error";
+        document.getElementById("status-detalle").innerText = "Ocurrió un error al consultar el estado";
+        document.getElementById("status-detalle").className = "status-box status-inoperativo";
       } finally {
         clearInterval(mensajeInterval);
         mostrarOverlay(false);
