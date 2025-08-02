@@ -482,61 +482,6 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
-    const CACHE_DURACION = 5 * 60 * 1000;
-
-    const cacheMemoria = {};
-    let ultimaActualizacion = 0;
-    let datosCompletos = null;
-
-    document.addEventListener('DOMContentLoaded', function() {
-      if (sessionStorage.getItem('autenticado')) {
-        cargarDatosCompletos();
-      }
-    });
-
-    async function cargarDatosCompletos() {
-      try {
-        const ahora = Date.now();
-        if (datosCompletos && (ahora - ultimaActualizacion < CACHE_DURACION)) {
-          return;
-        }
-
-        const response = await fetch(URL_GET + "?tipo=completo");
-        datosCompletos = await response.json();
-        ultimaActualizacion = ahora;
-        
-        if (datosCompletos && !datosCompletos.error) {
-          datosCompletos.forEach(item => {
-            cacheMemoria[item.ID] = item;
-          });
-        }
-      } catch (error) {
-        console.error("Error al cargar datos completos:", error);
-      }
-    }
-
-    async function buscarEquipo(id) {
-      if (cacheMemoria[id]) {
-        return cacheMemoria[id];
-      }
-
-      if (datosCompletos && (Date.now() - ultimaActualizacion < CACHE_DURACION)) {
-        const encontrado = datosCompletos.find(item => item.ID === id);
-        if (encontrado) {
-          cacheMemoria[id] = encontrado;
-          return encontrado;
-        }
-        return { error: "Equipo no encontrado" };
-      }
-
-      try {
-        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
-        return await response.json();
-      } catch (error) {
-        console.error("Error al buscar equipo:", error);
-        return { error: "Error de conexión" };
-      }
-    }
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -606,6 +551,23 @@
         refreshBtn.style.display = 'none';
       }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!sessionStorage.getItem('autenticado')) {
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('main-container').style.display = 'none';
+        document.getElementById('blank-container').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'none';
+      } else {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('main-container').style.display = 'block';
+        document.getElementById('blank-container').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'flex';
+        setTimeout(() => {
+          document.getElementById('main-container').classList.add('active');
+        }, 50);
+      }
+    });
 
     function verificarAcceso() {
       const passwordInput = document.getElementById('password-input');
@@ -696,7 +658,11 @@
 
     async function consultarEstado() {
       const id = document.getElementById("numero-equipo").value.trim();
-      
+      const familiaBox = document.getElementById("familia-equipo");
+      const statusBox = document.getElementById("status-equipo");
+      const statusDetalle = document.getElementById("status-detalle");
+      const obsBox = document.getElementById("observaciones-equipo");
+
       if (!id) {
         alert("Por favor ingrese un número de equipo");
         return;
@@ -715,21 +681,21 @@
       }, INTERVALO_MENSAJES);
 
       try {
-        const data = await buscarEquipo(id);
+        const response = await fetch(URL_GET + "?tipo=equipo&id=" + encodeURIComponent(id));
+        const data = await response.json();
+
         clearInterval(mensajeInterval);
 
         if (data.error) {
-          document.getElementById("familia-equipo").innerText = "Equipo no encontrado";
-          document.getElementById("status-equipo").innerText = "N/A";
-          document.getElementById("status-detalle").innerText = data.error === "Equipo no encontrado" 
-            ? "El equipo no existe en la base de datos" 
-            : "Error al consultar el estado";
-          document.getElementById("status-detalle").className = "status-box status-otros";
+          familiaBox.innerText = "Equipo no encontrado";
+          statusBox.innerText = "N/A";
+          statusDetalle.innerText = "El equipo no existe en la base de datos";
+          statusDetalle.className = "status-box status-otros";
         } else {
-          document.getElementById("familia-equipo").innerText = data.FAMILIA || "Sin información";
+          familiaBox.innerText = data.FAMILIA || "Sin información";
           
           const estado = (data["STATUS ✎"] || "Desconocido").toUpperCase();
-          document.getElementById("status-equipo").innerText = "Estado: " + estado;
+          statusBox.innerText = "Estado: " + estado;
           
           let estadoClass = "status-otros";
           let icono = "";
@@ -756,17 +722,18 @@
             icono = estado;
           }
           
-          document.getElementById("status-detalle").innerHTML = icono;
-          document.getElementById("status-detalle").className = "status-box " + estadoClass;
+          statusDetalle.innerHTML = icono;
+          statusDetalle.className = "status-box " + estadoClass;
           
-          document.getElementById("observaciones-equipo").innerText = data.OBSERVACIONES || "Sin observaciones";
+          obsBox.innerText = data.OBSERVACIONES || "Sin observaciones";
         }
       } catch (error) {
         console.error("Error al consultar:", error);
-        document.getElementById("status-equipo").innerText = "Error";
-        document.getElementById("status-detalle").innerText = "Ocurrió un error al consultar el estado";
-        document.getElementById("status-detalle").className = "status-box status-inoperativo";
+        statusBox.innerText = "Error";
+        statusDetalle.innerText = "Ocurrió un error al consultar el estado";
+        statusDetalle.className = "status-box status-inoperativo";
       } finally {
+        clearInterval(mensajeInterval);
         mostrarOverlay(false);
       }
     }
