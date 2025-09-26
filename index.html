@@ -507,11 +507,11 @@
 
   <div id="blank-container" class="blank-container">
     <div class="zoom-controls">
+      <button class="zoom-btn" onclick="cambiarZoom(0.4)">40%</button>
       <button class="zoom-btn" onclick="cambiarZoom(0.5)">50%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(0.6)">60%</button>
       <button class="zoom-btn" onclick="cambiarZoom(0.8)">80%</button>
       <button class="zoom-btn" onclick="cambiarZoom(1)">100%</button>
-      <button class="zoom-btn" onclick="cambiarZoom(1.5)">150%</button>
-      <button class="zoom-btn" onclick="cambiarZoom(2)">200%</button>
       <span class="zoom-display" id="zoom-display">100%</span>
     </div>
     <div class="touch-hint">👆 Usa dos dedos para hacer zoom o desplazarte</div>
@@ -904,8 +904,18 @@
       }
     });
 
-    document.querySelector('.sheet-container').addEventListener('wheel', function(e) {
-      if (e.ctrlKey) {
+    let touchStartDistance = 0;
+    document.getElementById('sheet-wrapper').addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        touchStartDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      }
+    });
+
+    document.getElementById('sheet-wrapper').addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && e.scale !== undefined) {
         e.preventDefault();
       }
     }, { passive: false });
@@ -916,6 +926,16 @@
         e.stopPropagation();
       }
     });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+          console.log('SW registered: ', registration);
+        }).catch(function(registrationError) {
+          console.log('SW registration failed: ', registrationError);
+        });
+      });
+    }
   </script>
 </body>
 </html>
