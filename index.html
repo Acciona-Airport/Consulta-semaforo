@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"/>
   <title>Consulta de Estado de Equipos - Semaforo AMS</title>
   <style>
-    * { box-sizing: border-box; }
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f4f4f4;
@@ -13,25 +16,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 15px 80px;
+      padding: 20px 10px 80px;
       margin: 0;
       overflow-x: hidden;
       min-height: 100vh;
       position: relative;
+      touch-action: pan-y pinch-zoom;
     }
     .container {
       background-color: #ffffff;
-      padding: 25px;
-      border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       max-width: 400px;
       width: 100%;
       border: 1px solid #ccc;
       position: absolute;
       opacity: 0;
       transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      margin-bottom: 100px;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      margin-bottom: 80px;
     }
     .container.active {
       opacity: 1;
@@ -39,9 +43,9 @@
     }
     .auth-container {
       background-color: #ffffff;
-      padding: 25px;
-      border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       max-width: 400px;
       width: 100%;
       border: 1px solid #ccc;
@@ -49,7 +53,7 @@
       position: absolute;
       opacity: 1;
       transform: translateY(0);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
     .auth-container.hide {
       opacity: 0;
@@ -58,47 +62,48 @@
     .logo-wrapper {
       display: flex;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       position: relative;
-      height: 100px;
+      height: 80px;
     }
     .logo-acciona {
-      max-width: 180px;
+      max-width: 150px;
       height: auto;
       position: absolute;
-      transition: opacity 1.5s ease;
+      transition: opacity 1.2s ease;
     }
     .logo-semaforo {
-      max-width: 240px;
+      max-width: 200px;
       height: auto;
       position: absolute;
-      transition: opacity 1.5s ease;
+      transition: opacity 1.2s ease;
       opacity: 0;
-      margin-top: -20px;
+      margin-top: -15px;
     }
     h1 {
-      font-size: 16px;
+      font-size: 15px;
       color: #111;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       white-space: normal;
       width: 100%;
-      padding: 0 10px;
+      padding: 0 8px;
       font-weight: 600;
+      line-height: 1.3;
     }
     label {
       display: block;
-      margin-top: 14px;
-      margin-bottom: 6px;
+      margin-top: 12px;
+      margin-bottom: 5px;
       font-weight: bold;
       color: #333;
-      font-size: 14px;
+      font-size: 13px;
     }
-    .section { margin-bottom: 20px; }
+    .section { margin-bottom: 16px; }
     .input-estilo {
       width: 100%;
-      min-height: 42px;
-      padding: 10px 12px;
+      min-height: 44px;
+      padding: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
       font-size: 14px;
@@ -109,7 +114,7 @@
     }
     .input-estilo:focus {
       border-color: #c62828;
-      box-shadow: 0 0 5px rgba(198, 40, 40, 0.4);
+      box-shadow: 0 0 4px rgba(198, 40, 40, 0.3);
       outline: none;
     }
     .datetime-box {
@@ -117,19 +122,19 @@
       border: 1px solid #ccc;
       padding: 10px;
       text-align: center;
-      border-radius: 8px;
-      margin-bottom: 18px;
+      border-radius: 6px;
+      margin-bottom: 15px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       color: #222;
     }
     .status-box {
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
       text-align: center;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
     }
     .status-operativo {
       background-color: #d4edda;
@@ -168,14 +173,14 @@
     }
     .spinner {
       display: inline-block;
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       border: 2px solid rgba(198, 40, 40, 0.3);
       border-top-color: #c62828;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       vertical-align: middle;
-      margin-right: 6px;
+      margin-right: 5px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     #overlay {
@@ -190,10 +195,10 @@
       flex-direction: column;
     }
     #overlay .loader {
-      width: 60px;
-      height: 60px;
-      border: 6px solid rgba(198, 40, 40, 0.2);
-      border-top: 6px solid #c62828;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(198, 40, 40, 0.2);
+      border-top: 5px solid #c62828;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -201,43 +206,44 @@
       background-color: #c62828;
       color: white;
       border: none;
-      padding: 12px 20px;
+      padding: 14px 20px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
       margin-top: 10px;
       width: 100%;
       transition: background-color 0.3s;
+      min-height: 44px;
     }
-    .btn:hover {
+    .btn:hover, .btn:active {
       background-color: #b71c1c;
     }
     .status-mensaje {
-      margin-top: 15px;
-      font-size: 16px;
+      margin-top: 12px;
+      font-size: 14px;
       color: #333;
       text-align: center;
     }
     .error-auth {
       color: #c62828;
-      margin-top: 10px;
+      margin-top: 8px;
       font-weight: bold;
       display: none;
     }
     .auth-loader {
-      width: 30px;
-      height: 30px;
-      border: 4px solid rgba(198, 40, 40, 0.2);
-      border-top: 4px solid #c62828;
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(198, 40, 40, 0.2);
+      border-top: 3px solid #c62828;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 10px auto;
+      margin: 8px auto;
       display: none;
     }
     .auth-message {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
-      margin: 10px 0;
+      margin: 8px 0;
       display: none;
     }
     .auth-success {
@@ -251,11 +257,12 @@
     }
     .toggle-password {
       position: absolute;
-      right: 10px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
       user-select: none;
+      font-size: 16px;
     }
     .bottom-nav {
       position: fixed;
@@ -263,124 +270,151 @@
       left: 0;
       width: 100%;
       background-color: #ffffff;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-around;
-      padding: 8px 0;
+      padding: 6px 0;
       z-index: 1000;
     }
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 5px 12px;
+      padding: 6px 10px;
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 6px;
       transition: all 0.3s ease;
       text-decoration: none;
       color: #555;
+      min-width: 60px;
     }
     .nav-item.active {
       color: #c62828;
       background-color: rgba(198, 40, 40, 0.1);
     }
-    .nav-item:hover {
-      background-color: rgba(198, 40, 40, 0.05);
+    .nav-item:active {
+      background-color: rgba(198, 40, 40, 0.15);
+      transform: scale(0.95);
     }
     .nav-icon {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       margin-bottom: 2px;
     }
     .nav-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
     }
     .blank-container {
       display: none;
       background-color: #ffffff;
-      padding: 25px;
-      border-radius: 18px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      max-width: 800px;
+      padding: 15px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
+      max-width: 95vw;
       border: 1px solid #ccc;
       position: absolute;
       opacity: 0;
       transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
     .blank-container.active {
       opacity: 1;
       transform: translateY(0);
     }
-    .sheet-container {
+    .sheet-wrapper {
       width: 100%;
-      height: 65vh;
+      height: 70vh;
       border: 1px solid #ddd;
-      overflow: auto;
       border-radius: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       position: relative;
       background: white;
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y pinch-zoom;
     }
-    #sheets-iframe {
+    .sheet-iframe {
       width: 100%;
       height: 100%;
       border: none;
-      transition: transform 0.3s ease;
+      min-width: 800px;
+      min-height: 600px;
     }
     .zoom-controls {
       position: sticky;
       top: 10px;
       right: 10px;
       z-index: 101;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.95);
       padding: 8px;
       border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       margin-bottom: 10px;
       text-align: center;
       backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex-wrap: wrap;
     }
     .zoom-btn {
       background: #c62828;
       color: white;
       border: none;
-      padding: 6px 12px;
-      margin: 0 2px;
+      padding: 8px 12px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 12px;
       transition: background 0.3s;
-    }
-    .zoom-btn:hover {
-      background: #b71c1c;
+      min-width: 44px;
+      min-height: 44px;
     }
     .zoom-btn:active {
+      background: #b71c1c;
       transform: scale(0.95);
     }
+    .zoom-display {
+      font-size: 12px;
+      font-weight: bold;
+      margin: 0 8px;
+      min-width: 50px;
+      text-align: center;
+    }
+    .touch-hint {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      margin-top: 5px;
+    }
     .espacio-adicional {
-      height: 60px;
+      height: 50px;
       width: 100%;
     }
     .refresh-btn {
       position: fixed;
-      bottom: 15px;
+      bottom: 70px;
       left: 50%;
       transform: translateX(-50%);
       background-color: #c62828;
       color: white;
       border: none;
-      padding: 8px 16px;
+      padding: 10px 20px;
       border-radius: 20px;
       cursor: pointer;
       font-size: 14px;
       z-index: 1001;
       display: none;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       transition: background-color 0.3s;
+      min-height: 44px;
+      min-width: 120px;
+    }
+    .refresh-btn:active {
+      background-color: #b71c1c;
+      transform: translateX(-50%) scale(0.95);
     }
     .refresh-btn.actualizando {
       background-color: #ffc107;
@@ -388,28 +422,39 @@
     .refresh-btn.actualizado {
       background-color: #28a745;
     }
-    .refresh-btn:hover:not(.actualizando):not(.actualizado) {
-      background-color: #b71c1c;
-    }
     .refresh-spinner {
       display: none;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border: 3px solid rgba(255, 255, 255, 0.3);
       border-top: 3px solid white;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-right: 8px;
+      margin-right: 6px;
       vertical-align: middle;
+    }
+    @media (max-width: 480px) {
+      body { padding: 15px 5px 70px; }
+      .container, .auth-container { padding: 15px; }
+      .blank-container { padding: 10px; }
+      .zoom-controls { 
+        top: 5px; 
+        right: 5px; 
+        padding: 6px; 
+      }
+      .zoom-btn { 
+        padding: 6px 10px; 
+        font-size: 11px; 
+      }
     }
   </style>
 </head>
 <body>
   <div id="auth-container" class="auth-container">
     <div class="logo-wrapper">
-      <img src="Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona">
+      <img src="Acciona_logo.png" alt="Acciona" class="logo-acciona">
     </div>
-    <h1>Acceso al sistema de consulta -Jefetur plataforma. 🔐</h1>
+    <h1>Acceso al sistema de consulta - Semaforo equipos AMS. 🔐</h1>
     <div class="section">
       <label for="password-input">Ingrese el código de acceso:</label>
       <div class="password-container">
@@ -427,8 +472,8 @@
 
   <div id="main-container" class="container">
     <div class="logo-wrapper">
-      <img src="Acciona_logo.png" alt="Acciona_logo.png" class="logo-acciona" id="logo-acciona">
-      <img src="semaforo.png" alt="semaforo.png" class="logo-semaforo" id="logo-semaforo">
+      <img src="Acciona_logo.png" alt="Acciona" class="logo-acciona" id="logo-acciona">
+      <img src="semaforo.png" alt="Semaforo" class="logo-semaforo" id="logo-semaforo">
     </div>
 
     <h1>Consulta de Estado de Equipos - Semaforo AMS</h1>
@@ -462,22 +507,23 @@
 
   <div id="blank-container" class="blank-container">
     <div class="zoom-controls">
-      <span style="font-size:12px; margin-right:5px;">Zoom:</span>
-      <button class="zoom-btn" onclick="cambiarZoom(0.2)">20%</button>
-      <button class="zoom-btn" onclick="cambiarZoom(0.4)">40%</button>
-      <button class="zoom-btn" onclick="cambiarZoom(0.6)">60%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(0.5)">50%</button>
       <button class="zoom-btn" onclick="cambiarZoom(0.8)">80%</button>
       <button class="zoom-btn" onclick="cambiarZoom(1)">100%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(1.5)">150%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(2)">200%</button>
+      <span class="zoom-display" id="zoom-display">100%</span>
     </div>
+    <div class="touch-hint">👆 Usa dos dedos para hacer zoom o desplazarte</div>
     
-    <div class="sheet-container" id="sheet-wrapper">
+    <div class="sheet-wrapper" id="sheet-wrapper">
       <iframe 
         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRLuOCyntG8ZcA37o7cj2HcDAEBYjwm4qsMVa6UgmnWmFGPkA9fBHlwyMV4k_XOmdvGBV1RrBzwLf6D/pubhtml?gid=1192655439&single=true" 
-        width="100%" 
-        height="100%"
+        class="sheet-iframe"
+        id="sheets-iframe"
         frameborder="0"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-        id="sheets-iframe">
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock"
+        allow="fullscreen">
       </iframe>
     </div>
   </div>
@@ -503,7 +549,7 @@
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span class="nav-label">Carga+Equipaje</span>
+      <span class="nav-label">Semaforo</span>
     </div>
   </nav>
 
@@ -535,12 +581,22 @@
 
     function cambiarZoom(nivel) {
       const iframe = document.getElementById('sheets-iframe');
+      const zoomDisplay = document.getElementById('zoom-display');
       currentZoom = nivel;
       
       iframe.style.transform = `scale(${nivel})`;
       iframe.style.transformOrigin = '0 0';
       iframe.style.width = `${100/nivel}%`;
       iframe.style.height = `${100/nivel}%`;
+      zoomDisplay.textContent = `${Math.round(nivel * 100)}%`;
+      
+      vibrar(50);
+    }
+
+    function vibrar(duracion) {
+      if (navigator.vibrate) {
+        navigator.vibrate(duracion);
+      }
     }
 
     function obtenerContrasenas() {
@@ -563,6 +619,7 @@
       } else {
         passwordInput.type = 'password';
       }
+      vibrar(30);
     }
 
     function mostrarPantalla(idPantalla) {
@@ -577,7 +634,7 @@
           pantalla.classList.remove('active');
           setTimeout(() => {
             pantalla.style.display = 'none';
-          }, 500);
+          }, 400);
         }
       });
 
@@ -596,6 +653,8 @@
       } else {
         refreshBtn.style.display = 'none';
       }
+      
+      vibrar(30);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -649,6 +708,7 @@
           authMessage.textContent = "✅ Acceso validado.";
           authMessage.className = "auth-message auth-success";
           authMessage.style.display = 'block';
+          vibrar(200);
           
           setTimeout(function() {
             sessionStorage.setItem('autenticado', 'true');
@@ -659,8 +719,8 @@
             setTimeout(function() {
               mainContainer.classList.add('active');
               authContainer.style.display = 'none';
-            }, 500);
-          }, 1500);
+            }, 400);
+          }, 1200);
         } else {
           authMessage.textContent = "❌ Acceso denegado.";
           authMessage.className = "auth-message auth-error";
@@ -669,14 +729,15 @@
           passwordInput.value = '';
           passwordInput.focus();
           authButton.style.display = 'block';
+          vibrar(300);
         }
-      }, 1500);
+      }, 1200);
     }
 
     function actualizarFechaHora() {
       const now = new Date();
       const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const meses = ['Enero','Febrero','Marzo','Apríl','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       const diaSemana = dias[now.getDay()];
       const dia = now.getDate();
       const mes = meses[now.getMonth()];
@@ -712,6 +773,7 @@
 
       limpiarResultados();
       mostrarOverlay(true);
+      vibrar(30);
 
       let mensajeIndex = 0;
       const statusMensaje = document.getElementById("status-mensaje");
@@ -777,11 +839,13 @@
             document.getElementById("observaciones-equipo").innerText = equipoEncontrado.OBSERVACIONES || "Sin observaciones";
           }
         }
+        vibrar(100);
       } catch (error) {
         console.error("Error al consultar:", error);
         document.getElementById("status-equipo").innerText = "Error";
         document.getElementById("status-detalle").innerText = "Ocurrió un error al consultar el estado";
         document.getElementById("status-detalle").className = "status-box status-inoperativo";
+        vibrar(200);
       } finally {
         clearInterval(mensajeInterval);
         mostrarOverlay(false);
@@ -798,6 +862,7 @@
         refreshSpinner.style.display = 'inline-block';
         refreshText.textContent = 'Actualizando...';
         refreshBtn.disabled = true;
+        vibrar(30);
 
         const iframe = document.getElementById('sheets-iframe');
         const timestamp = new Date().getTime();
@@ -809,20 +874,21 @@
             refreshBtn.classList.remove('actualizando');
             refreshBtn.classList.add('actualizado');
             refreshText.textContent = 'Actualizado ✅';
+            vibrar(100);
             
             setTimeout(function() {
                 refreshBtn.classList.remove('actualizado');
                 refreshText.textContent = 'Actualizar';
                 refreshBtn.disabled = false;
-            }, 2000);
-        }, 1500);
+            }, 1500);
+        }, 1200);
     }
 
     setInterval(actualizarHojasGoogle, 300000);
 
     document.addEventListener('DOMContentLoaded', function() {
         if (sessionStorage.getItem('autenticado')) {
-            setTimeout(actualizarHojasGoogle, 1000);
+            setTimeout(actualizarHojasGoogle, 800);
         }
     });
 
