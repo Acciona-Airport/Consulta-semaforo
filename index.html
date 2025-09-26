@@ -316,26 +316,50 @@
     }
     .sheet-container {
       width: 100%;
-      height: 70vh;
-      border: none;
-      overflow: hidden;
+      height: 65vh;
+      border: 1px solid #ddd;
+      overflow: auto;
       border-radius: 8px;
       margin-bottom: 20px;
       position: relative;
+      background: white;
+      -webkit-overflow-scrolling: touch;
     }
-    .sheet-container iframe {
-      width: 300%;
-      height: 300%;
-      transform: scale(0.33);
-      transform-origin: 0 0;
-    }
-    .sheet-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
+    #sheets-iframe {
       width: 100%;
       height: 100%;
-      z-index: 100;
+      border: none;
+      transition: transform 0.3s ease;
+    }
+    .zoom-controls {
+      position: sticky;
+      top: 10px;
+      right: 10px;
+      z-index: 101;
+      background: rgba(255,255,255,0.9);
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+      text-align: center;
+      backdrop-filter: blur(5px);
+    }
+    .zoom-btn {
+      background: #c62828;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      margin: 0 2px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.3s;
+    }
+    .zoom-btn:hover {
+      background: #b71c1c;
+    }
+    .zoom-btn:active {
+      transform: scale(0.95);
     }
     .espacio-adicional {
       height: 60px;
@@ -437,13 +461,23 @@
   </div>
 
   <div id="blank-container" class="blank-container">
-    <div class="sheet-container">
+    <div class="zoom-controls">
+      <span style="font-size:12px; margin-right:5px;">Zoom:</span>
+      <button class="zoom-btn" onclick="cambiarZoom(0.7)">70%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(0.9)">90%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(1)">100%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(1.2)">120%</button>
+      <button class="zoom-btn" onclick="cambiarZoom(1.5)">150%</button>
+    </div>
+    
+    <div class="sheet-container" id="sheet-wrapper">
       <iframe 
         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRLuOCyntG8ZcA37o7cj2HcDAEBYjwm4qsMVa6UgmnWmFGPkA9fBHlwyMV4k_XOmdvGBV1RrBzwLf6D/pubhtml?gid=1192655439&single=true" 
         width="100%" 
         height="100%"
         frameborder="0"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms">
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        id="sheets-iframe">
       </iframe>
     </div>
   </div>
@@ -482,6 +516,7 @@
       "Procesando resultados..."
     ];
     const INTERVALO_MENSAJES = 4000;
+    let currentZoom = 1;
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -497,6 +532,16 @@
     }
 
     setInterval(alternarLogos, 3000);
+
+    function cambiarZoom(nivel) {
+      const iframe = document.getElementById('sheets-iframe');
+      currentZoom = nivel;
+      
+      iframe.style.transform = `scale(${nivel})`;
+      iframe.style.transformOrigin = '0 0';
+      iframe.style.width = `${100/nivel}%`;
+      iframe.style.height = `${100/nivel}%`;
+    }
 
     function obtenerContrasenas() {
       return [
@@ -539,7 +584,7 @@
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach(item => {
         item.classList.remove('active');
-        if (item.textContent.includes(idPantalla === 'main-container' ? 'Inicio' : 'Semaforo')) {
+        if (item.textContent.includes(idPantalla === 'main-container' ? 'Buscador' : 'Semaforo')) {
           item.classList.add('active');
         }
       });
@@ -547,6 +592,7 @@
       const refreshBtn = document.getElementById('refresh-btn');
       if (idPantalla === 'blank-container') {
         refreshBtn.style.display = 'block';
+        setTimeout(() => cambiarZoom(1), 100);
       } else {
         refreshBtn.style.display = 'none';
       }
@@ -630,7 +676,7 @@
     function actualizarFechaHora() {
       const now = new Date();
       const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const meses = ['Enero','Febrero','Marzo','Apríl','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       const diaSemana = dias[now.getDay()];
       const dia = now.getDate();
       const mes = meses[now.getMonth()];
@@ -753,12 +799,10 @@
         refreshText.textContent = 'Actualizando...';
         refreshBtn.disabled = true;
 
-        const iframes = document.querySelectorAll('.sheet-container iframe');
-        iframes.forEach(iframe => {
-            const timestamp = new Date().getTime();
-            const newSrc = iframe.src.split('&')[0] + '&timestamp=' + timestamp;
-            iframe.src = newSrc;
-        });
+        const iframe = document.getElementById('sheets-iframe');
+        const timestamp = new Date().getTime();
+        const newSrc = iframe.src.split('&timestamp=')[0] + '&timestamp=' + timestamp;
+        iframe.src = newSrc;
 
         setTimeout(function() {
             refreshSpinner.style.display = 'none';
@@ -794,8 +838,14 @@
       }
     });
 
+    document.querySelector('.sheet-container').addEventListener('wheel', function(e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
     document.addEventListener('click', function(e) {
-      if (e.target.closest('.sheet-container iframe')) {
+      if (e.target.closest('#sheets-iframe')) {
         e.preventDefault();
         e.stopPropagation();
       }
