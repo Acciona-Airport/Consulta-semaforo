@@ -323,26 +323,26 @@
       opacity: 1;
       transform: translateY(0);
     }
-.sheet-wrapper {
-    width: 100%;
-    height: 80vh;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    position: relative;
-    background: white;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-x pan-y pinch-zoom;
-    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.1);
-}
-
-.sheet-iframe {
-    width: 100%;  /* Ancho completo del contenedor */
-    height: 100%; /* Alto completo del contenedor */
-    border: none;
-    transform-origin: 0 0;
-}
+    .sheet-wrapper {
+      width: 100%;
+      height: 70vh;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      position: relative;
+      background: white;
+      overflow: scroll;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y pinch-zoom;
+      box-shadow: inset 0 -2px 5px rgba(0,0,0,0.1);
+    }
+    .sheet-iframe {
+      width: auto;
+      min-width: 1200px;
+      height: 100%;
+      border: none;
+      transform-origin: 0 0;
+    }
     .sheet-wrapper::-webkit-scrollbar {
       height: 8px;
       width: 8px;
@@ -579,8 +579,6 @@
     ];
     const INTERVALO_MENSAJES = 4000;
     let currentZoom = 0.5;
-    let isPinching = false;
-    let initialDistance = 0;
 
     function alternarLogos() {
       const logoAcciona = document.getElementById('logo-acciona');
@@ -597,78 +595,18 @@
 
     setInterval(alternarLogos, 3000);
 
-  function cambiarZoom(nivel) {
-    const iframe = document.getElementById('sheets-iframe');
-    const zoomDisplay = document.getElementById('zoom-display');
-    currentZoom = nivel;
-    
-    // Aplicar zoom directamente al iframe
-    iframe.style.zoom = `${nivel * 100}%`;
-    zoomDisplay.textContent = `${Math.round(nivel * 100)}%`;
-    
-    vibrar(50);
-}
-O si no funciona zoom, usa transform pero con el contenedor:
-
-javascript
-function cambiarZoom(nivel) {
-    const sheetWrapper = document.getElementById('sheet-wrapper');
-    const zoomDisplay = document.getElementById('zoom-display');
-    currentZoom = nivel;
-    
-    // Aplicar zoom al contenedor principal
-    sheetWrapper.style.transform = `scale(${nivel})`;
-    sheetWrapper.style.transformOrigin = '0 0';
-    sheetWrapper.style.width = `${100/nivel}%`;
-    sheetWrapper.style.height = `${100/nivel}%`;
-    
-    zoomDisplay.textContent = `${Math.round(nivel * 100)}%`;
-    
-    vibrar(50);
-}
-La segunda opción es más confiable porque escala todo el contenedor, no solo el iframe.
-
-
-
-
-    function setupTouchZoom() {
-      const sheetWrapper = document.getElementById('sheet-wrapper');
+    function cambiarZoom(nivel) {
+      const iframe = document.getElementById('sheets-iframe');
+      const zoomDisplay = document.getElementById('zoom-display');
+      currentZoom = nivel;
       
-      sheetWrapper.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 2) {
-          isPinching = true;
-          initialDistance = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
-          e.preventDefault();
-        }
-      });
-
-      sheetWrapper.addEventListener('touchmove', function(e) {
-        if (e.touches.length === 2 && isPinching) {
-          const currentDistance = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
-          
-          const scaleFactor = currentDistance / initialDistance;
-          const newZoom = Math.max(0.2, Math.min(1.5, currentZoom * scaleFactor));
-          
-          if (Math.abs(newZoom - currentZoom) > 0.05) {
-            cambiarZoom(newZoom);
-            initialDistance = currentDistance;
-          }
-          
-          e.preventDefault();
-        }
-      });
-
-      sheetWrapper.addEventListener('touchend', function(e) {
-        if (e.touches.length < 2) {
-          isPinching = false;
-        }
-      });
+      iframe.style.transform = `scale(${nivel})`;
+      iframe.style.transformOrigin = '0 0';
+      iframe.style.width = `${100/nivel}%`;
+      iframe.style.height = `${100/nivel}%`;
+      zoomDisplay.textContent = `${Math.round(nivel * 100)}%`;
+      
+      vibrar(50);
     }
 
     function vibrar(duracion) {
@@ -750,7 +688,6 @@ La segunda opción es más confiable porque escala todo el contenedor, no solo e
           document.getElementById('main-container').classList.add('active');
         }, 50);
       }
-      setupTouchZoom();
     });
 
     function verificarAcceso() {
