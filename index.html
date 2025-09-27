@@ -325,7 +325,7 @@
     }
 .sheet-wrapper {
     width: 100%;
-    height: calc(100vh - 200px);  /* Altura dinámica */
+    height: 80vh;  /* Altura fija suficiente */
     border: 1px solid #ddd;
     border-radius: 8px;
     margin-bottom: 15px;
@@ -338,11 +338,11 @@
 }
 
 .sheet-iframe {
-    width: auto;
-    min-width: 1200px;
-    height: 100%;  /* Ocupa el 100% del contenedor */
+    width: 100%;  /* Cambia a 100% del contenedor */
+    height: 100%; /* Ocupa toda la altura */
     border: none;
     transform-origin: 0 0;
+    min-width: auto;  /* Quita el min-width fijo */
 }
     .sheet-wrapper::-webkit-scrollbar {
       height: 8px;
@@ -598,20 +598,20 @@
 
     setInterval(alternarLogos, 3000);
 
-    function cambiarZoom(nivel) {
-      const iframe = document.getElementById('sheets-iframe');
-      const zoomDisplay = document.getElementById('zoom-display');
-      currentZoom = nivel;
-      
-      iframe.style.transform = `scale(${nivel})`;
-      iframe.style.transformOrigin = '0 0';
-      iframe.style.width = 'auto';
-      iframe.style.minWidth = '1200px';
-      iframe.style.height = '100%';
-      zoomDisplay.textContent = `${Math.round(nivel * 100)}%`;
-      
-      vibrar(50);
-    }
+   function cambiarZoom(nivel) {
+    const iframe = document.getElementById('sheets-iframe');
+    const zoomDisplay = document.getElementById('zoom-display');
+    currentZoom = nivel;
+    
+    iframe.style.transform = `scale(${nivel})`;
+    iframe.style.transformOrigin = '0 0';
+    iframe.style.width = '100%';  /* Ancho completo */
+    iframe.style.height = '100%'; /* Alto completo */
+    iframe.style.minWidth = 'auto'; /* Sin ancho mínimo */
+    zoomDisplay.textContent = `${Math.round(nivel * 100)}%`;
+    
+    vibrar(50);
+}
 
     function setupTouchZoom() {
       const sheetWrapper = document.getElementById('sheet-wrapper');
